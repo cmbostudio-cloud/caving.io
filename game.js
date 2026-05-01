@@ -87,7 +87,7 @@ const ORE_NAMES = {
 
 const I18N = {
   en: {
-    loading: 'LOADING', settings: 'SETTINGS', layout: 'LAYOUT', classic: 'CLASSIC', square: 'SQUARE',
+    loading: 'LOADING', settings: 'SETTINGS', layout: 'LAYOUT', classic: 'CLASSIC', square: 'SQUARE', saveLoad: 'SAVE/LOAD',
     language: 'LANGUAGE', status: 'STATUS', hp: 'HP', stamina: 'STAMINA', exp: 'EXP', level: 'LEVEL',
     pickaxe: 'PICKAXE', area: 'AREA', gold: 'GOLD', inventory: 'INVENTORY', inventoryButton: 'INVENTORY (I)', saveButton: 'SAVE (K)', loadButton: 'LOAD (L)', materials: 'MATERIALS', action: 'ACTION',
     use: 'USE', mine: 'MINE', return: 'RETURN (R)', rest: 'REST', log: 'LOG',
@@ -122,7 +122,7 @@ const I18N = {
     gameSaved: 'Game saved.', gameLoaded: 'Save loaded.', noSave: 'No save data found.'
   },
   ko: {
-    loading: '로딩 중', settings: '설정', layout: '배치', classic: '기본', square: '정사각',
+    loading: '로딩 중', settings: '설정', layout: '배치', classic: '기본', square: '정사각', saveLoad: '저장/불러오기',
     language: '언어', status: '상태', hp: '체력', stamina: '스태미나', exp: '경험치', level: '레벨',
     pickaxe: '곡괭이', area: '지역', gold: '골드', inventory: '인벤토리', inventoryButton: '인벤토리 (I)', saveButton: '저장 (K)', loadButton: '불러오기 (L)', materials: '재료', action: '행동',
     use: '사용', mine: '채굴', return: '귀환 (R)', rest: '휴식', log: '기록',
@@ -177,6 +177,19 @@ function materialName(material) {
 
 function rnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 function rndChoice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function log(message, type = 'sys') {
+  const list = document.getElementById('log-list');
+  if (!list) return;
+  const line = document.createElement('div');
+  line.className = `log-line log-${type}`;
+  line.textContent = message;
+  list.appendChild(line);
+  while (list.children.length > 180) {
+    list.removeChild(list.firstChild);
+  }
+  list.scrollTop = list.scrollHeight;
+}
 
 function log(message, type = 'sys') {
   const list = document.getElementById('log-list');
@@ -978,7 +991,7 @@ function tryReturn() {
   stopAutoMove();
   if (G.gameOver) return;
 
-  if (G.area === 'mine') {
+  if (G.area === 'mine' || G.area === 'forest' || G.area === 'shop') {
     enterPlaza('forest');
     return;
   }
@@ -1285,6 +1298,15 @@ function loadGame() {
     return true;
   } catch {
     return false;
+  }
+}
+
+function manualLoad() {
+  const loaded = loadGame();
+  if (loaded) {
+    log(t('gameLoaded'), 'ok');
+  } else {
+    log(t('noSave'), 'warn');
   }
 }
 
