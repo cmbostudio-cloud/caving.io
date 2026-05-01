@@ -191,6 +191,19 @@ function log(message, type = 'sys') {
   list.scrollTop = list.scrollHeight;
 }
 
+function log(message, type = 'sys') {
+  const list = document.getElementById('log-list');
+  if (!list) return;
+  const line = document.createElement('div');
+  line.className = `log-line log-${type}`;
+  line.textContent = message;
+  list.appendChild(line);
+  while (list.children.length > 180) {
+    list.removeChild(list.firstChild);
+  }
+  list.scrollTop = list.scrollHeight;
+}
+
 function loadSettings() {
   try {
     const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
@@ -1285,6 +1298,15 @@ function loadGame() {
     return true;
   } catch {
     return false;
+  }
+}
+
+function manualLoad() {
+  const loaded = loadGame();
+  if (loaded) {
+    log(t('gameLoaded'), 'ok');
+  } else {
+    log(t('noSave'), 'warn');
   }
 }
 
