@@ -49,6 +49,13 @@
           <button type="button" data-lang-option="ko" onclick="setLanguage('ko')">KO</button>
         </div>
       </div>
+      <div class="settings-row">
+        <span class="settings-label" data-i18n="saveLoad">SAVE/LOAD</span>
+        <div class="segmented" role="group" aria-label="Save and load">
+          <button type="button" data-i18n="saveButton" onclick="manualSave()">SAVE (K)</button>
+          <button type="button" data-i18n="loadButton" onclick="manualLoad()">LOAD (L)</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -168,6 +175,8 @@
       <div class="action-grid">
         <button class="action-btn" type="button" data-i18n="return" onclick="tryReturn()">RETURN (R)</button>
         <button class="action-btn" type="button" data-i18n="inventoryButton" onclick="toggleInventory()">INVENTORY (I)</button>
+        <button class="action-btn" type="button" data-i18n="saveButton" onclick="manualSave()">SAVE (K)</button>
+        <button class="action-btn" type="button" data-i18n="loadButton" onclick="manualLoad()">LOAD (L)</button>
       </div>
     </div>
 

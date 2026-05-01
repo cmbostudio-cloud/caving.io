@@ -87,14 +87,14 @@ const ORE_NAMES = {
 
 const I18N = {
   en: {
-    loading: 'LOADING', settings: 'SETTINGS', layout: 'LAYOUT', classic: 'CLASSIC', square: 'SQUARE',
+    loading: 'LOADING', settings: 'SETTINGS', layout: 'LAYOUT', classic: 'CLASSIC', square: 'SQUARE', saveLoad: 'SAVE/LOAD',
     language: 'LANGUAGE', status: 'STATUS', hp: 'HP', stamina: 'STAMINA', exp: 'EXP', level: 'LEVEL',
-    pickaxe: 'PICKAXE', area: 'AREA', gold: 'GOLD', inventory: 'INVENTORY', inventoryButton: 'INVENTORY (I)', materials: 'MATERIALS', action: 'ACTION',
+    pickaxe: 'PICKAXE', area: 'AREA', gold: 'GOLD', inventory: 'INVENTORY', inventoryButton: 'INVENTORY (I)', saveButton: 'SAVE (K)', loadButton: 'LOAD (L)', materials: 'MATERIALS', action: 'ACTION',
     use: 'USE', mine: 'MINE', return: 'RETURN (R)', rest: 'REST', log: 'LOG',
     noSelection: 'NO TILE SELECTED', moving: 'MOVING', select: 'SELECT', enter: 'ENTER', move: 'MOVE',
     player: 'Player', wall: 'Wall', floor: 'Floor', stairs: 'Stairs', grass: 'Grass', tree: 'Tree',
     stone: 'Stone', flower: 'Flower', mineEntrance: 'Mine entrance', shop: 'Shop', shopExit: 'Shop exit',
-    anvil: 'Anvil', exchange: 'Exchange', forestGate: 'Forest gate', plazaGate: 'Plaza gate',
+    anvil: 'Anvil', exchange: 'Exchange', forestGate: 'Forest gate', plazaGate: 'Plaza gate', plazaExit: 'Plaza exit',
     interactHint: 'Select a tile to see actions.', moveHint: 'Tap tile to move.', enterHint: 'Press E or tap tile to enter.',
     mineHintAction: 'Press Space/Z or tap tile to mine.', noActionHint: 'No action available.',
     emptyInventory: '-- EMPTY --', exchangeEmpty: 'Nothing to exchange.', sellOne: 'SELL 1', sellAll: 'SELL ALL',
@@ -118,17 +118,18 @@ const I18N = {
     returned: 'Returned to the forest.', returnUnavailable: 'You can return only from inside the cave.',
     gameOver: 'GAME OVER', gameOverLog: 'You collapsed in the cave.',
     gameOverText: depth => `You fell at B${depth}F.`, restart: 'RESTART',
-    startHint: 'Choose a destination on the map.', mineHint: 'Use the east gate to reach the forest.'
+    startHint: 'Choose a destination on the map.', mineHint: 'Use the east gate to reach the forest.',
+    gameSaved: 'Game saved.', gameLoaded: 'Save loaded.', noSave: 'No save data found.'
   },
   ko: {
-    loading: '로딩 중', settings: '설정', layout: '배치', classic: '기본', square: '정사각',
+    loading: '로딩 중', settings: '설정', layout: '배치', classic: '기본', square: '정사각', saveLoad: '저장/불러오기',
     language: '언어', status: '상태', hp: '체력', stamina: '스태미나', exp: '경험치', level: '레벨',
-    pickaxe: '곡괭이', area: '지역', gold: '골드', inventory: '인벤토리', inventoryButton: '인벤토리 (I)', materials: '재료', action: '행동',
+    pickaxe: '곡괭이', area: '지역', gold: '골드', inventory: '인벤토리', inventoryButton: '인벤토리 (I)', saveButton: '저장 (K)', loadButton: '불러오기 (L)', materials: '재료', action: '행동',
     use: '사용', mine: '채굴', return: '귀환 (R)', rest: '휴식', log: '기록',
     noSelection: '선택한 타일 없음', moving: '이동 중', select: '선택', enter: '입장', move: '이동',
     player: '플레이어', wall: '벽', floor: '바닥', stairs: '계단', grass: '풀', tree: '나무',
     stone: '돌', flower: '꽃', mineEntrance: '광산 입구', shop: '상점', shopExit: '상점 출구',
-    anvil: '모루', exchange: '거래소', forestGate: '숲 입구', plazaGate: '광장 입구',
+    anvil: '모루', exchange: '거래소', forestGate: '숲 입구', plazaGate: '광장 입구', plazaExit: '광장 출구',
     interactHint: '타일을 선택하면 행동 방법이 표시됩니다.', moveHint: '타일을 누르면 이동합니다.', enterHint: 'E 또는 타일 터치로 입장합니다.',
     mineHintAction: 'Space/Z 또는 타일 터치로 채굴합니다.', noActionHint: '가능한 행동이 없습니다.',
     emptyInventory: '-- 비어 있음 --', exchangeEmpty: '교환할 물건이 없습니다.', sellOne: '1개 판매', sellAll: '전부 판매',
@@ -152,7 +153,8 @@ const I18N = {
     returned: '숲으로 귀환했다.', returnUnavailable: '동굴 안에서만 귀환할 수 있다.',
     gameOver: '게임 오버', gameOverLog: '동굴 안에서 쓰러졌다.',
     gameOverText: depth => `B${depth}F에서 쓰러졌다.`, restart: '다시 시작',
-    startHint: '지도에서 목적지를 선택하세요.', mineHint: '동쪽 문을 사용하면 숲으로 갈 수 있습니다.'
+    startHint: '지도에서 목적지를 선택하세요.', mineHint: '동쪽 문을 사용하면 숲으로 갈 수 있습니다.',
+    gameSaved: '게임을 저장했다.', gameLoaded: '저장 데이터를 불러왔다.', noSave: '저장 데이터가 없다.'
   }
 };
 
@@ -175,6 +177,19 @@ function materialName(material) {
 
 function rnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 function rndChoice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function log(message, type = 'sys') {
+  const list = document.getElementById('log-list');
+  if (!list) return;
+  const line = document.createElement('div');
+  line.className = `log-line log-${type}`;
+  line.textContent = message;
+  list.appendChild(line);
+  while (list.children.length > 180) {
+    list.removeChild(list.firstChild);
+  }
+  list.scrollTop = list.scrollHeight;
+}
 
 function loadSettings() {
   try {
@@ -779,8 +794,13 @@ function enterForest(entry = 'plaza') {
   if (!G.forestMap) G.forestMap = generateForestMap();
   G.map = G.forestMap;
   G.selected = null;
-  G.px = FOREST_POINTS.spawn.x;
-  G.py = FOREST_POINTS.spawn.y;
+  if (entry === 'return') {
+    G.px = FOREST_POINTS.mine.x;
+    G.py = FOREST_POINTS.mine.y;
+  } else {
+    G.px = FOREST_POINTS.spawn.x;
+    G.py = FOREST_POINTS.spawn.y;
+  }
   render();
   log(entry === 'return' ? t('forestReturn') : t('forestEnter'), 'info');
 }
@@ -835,7 +855,7 @@ function tileLabel(cell, isPlayer, x, y) {
   if (cell.type === 'flower') return `${t('flower')} ${x}, ${y}`;
   if (cell.type === 'mineEntrance') return `${t('mineEntrance')} ${x}, ${y}`;
   if (cell.type === 'forestGate') return `${t('forestGate')} ${x}, ${y}`;
-  if (cell.type === 'plazaExit') return `${t('plazaGate')} ${x}, ${y}`;
+  if (cell.type === 'plazaExit') return `${t('plazaExit')} ${x}, ${y}`;
   if (cell.type === 'shop') return `${t('shop')} ${x}, ${y}`;
   if (cell.type === 'exchange') return `${t('exchange')} ${x}, ${y}`;
   if (cell.type === 'shopExit') return `${t('shopExit')} ${x}, ${y}`;
@@ -958,7 +978,7 @@ function tryReturn() {
   stopAutoMove();
   if (G.gameOver) return;
 
-  if (G.area === 'mine') {
+  if (G.area === 'mine' || G.area === 'forest' || G.area === 'shop') {
     enterPlaza('forest');
     return;
   }
@@ -1227,6 +1247,11 @@ function saveGame() {
   }
 }
 
+function manualSave() {
+  saveGame();
+  log(t('gameSaved'), 'ok');
+}
+
 function loadGame() {
   try {
     const saved = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
@@ -1260,6 +1285,15 @@ function loadGame() {
     return true;
   } catch {
     return false;
+  }
+}
+
+function manualLoad() {
+  const loaded = loadGame();
+  if (loaded) {
+    log(t('gameLoaded'), 'ok');
+  } else {
+    log(t('noSave'), 'warn');
   }
 }
 
@@ -1346,6 +1380,10 @@ document.addEventListener('keydown', e => {
     tryReturn();
   } else if (e.key === 'i' || e.key === 'I') {
     toggleInventory();
+  } else if (e.key === 'k' || e.key === 'K') {
+    manualSave();
+  } else if (e.key === 'l' || e.key === 'L') {
+    manualLoad();
   }
 });
 
