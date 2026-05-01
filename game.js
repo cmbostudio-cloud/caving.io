@@ -70,6 +70,9 @@ const SELL_VALUES = {
 
 const SAVE_KEY = 'caving-io-save-v1';
 
+const CARDINAL_DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+const ORE_BY_ID = Object.fromEntries(ORES.map(ore => [ore.id, ore]));
+
 let G = {}; // game state
 const SETTINGS_KEY = 'caving-io-settings';
 let SETTINGS = loadSettings();
@@ -177,19 +180,6 @@ function materialName(material) {
 
 function rnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 function rndChoice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-
-function log(message, type = 'sys') {
-  const list = document.getElementById('log-list');
-  if (!list) return;
-  const line = document.createElement('div');
-  line.className = `log-line log-${type}`;
-  line.textContent = message;
-  list.appendChild(line);
-  while (list.children.length > 180) {
-    list.removeChild(list.firstChild);
-  }
-  list.scrollTop = list.scrollHeight;
-}
 
 function log(message, type = 'sys') {
   const list = document.getElementById('log-list');
@@ -359,7 +349,7 @@ function floodFill(map, sx, sy) {
   visited[sy][sx] = true;
   while (queue.length) {
     const [cx, cy] = queue.shift();
-    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    for (const [dx, dy] of CARDINAL_DIRS) {
       const nx = cx + dx, ny = cy + dy;
       if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H) continue;
       if (visited[ny][nx]) continue;
@@ -691,9 +681,10 @@ function findPathTo(tx, ty) {
   const visited = Array.from({ length: MAP_H }, () => new Array(MAP_W).fill(false));
   const prev = Array.from({ length: MAP_H }, () => new Array(MAP_W).fill(null));
   const queue = [[G.px, G.py]];
+  let head = 0;
   visited[G.py][G.px] = true;
-  while (queue.length) {
-    const [cx, cy] = queue.shift();
+  while (head < queue.length) {
+    const [cx, cy] = queue[head++];
     if (cx === tx && cy === ty) {
       const path = [];
       let cur = [tx, ty];
@@ -703,7 +694,7 @@ function findPathTo(tx, ty) {
       }
       return path;
     }
-    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    for (const [dx, dy] of CARDINAL_DIRS) {
       const nx = cx + dx, ny = cy + dy;
       if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H) continue;
       if (visited[ny][nx]) continue;
@@ -717,7 +708,7 @@ function findPathTo(tx, ty) {
 }
 
 function findApproachTo(tx, ty) {
-  for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+  for (const [dx, dy] of CARDINAL_DIRS) {
     const nx = tx + dx, ny = ty + dy;
     if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H) continue;
     if (!isWalkableCell(G.map[ny][nx])) continue;
@@ -850,7 +841,7 @@ function cellGlyph(cell, isPlayer) {
     case 'anvil':
       return { ch: 'A', fg: '#cfd8dc', weight: 'bold' };
     case 'ore': {
-      const ore = ORES.find(o => o.id === cell.ore);
+      const ore = ORE_BY_ID[cell.ore];
       return { ch: ore.ch, fg: ore.fg, weight: 'normal' };
     }
     default:
@@ -874,7 +865,7 @@ function tileLabel(cell, isPlayer, x, y) {
   if (cell.type === 'shopExit') return `${t('shopExit')} ${x}, ${y}`;
   if (cell.type === 'anvil') return `${t('anvil')} ${x}, ${y}`;
   if (cell.type === 'ore') {
-    const ore = ORES.find(o => o.id === cell.ore);
+    const ore = ORE_BY_ID[cell.ore];
     return `${oreName(ore)} ${x}, ${y}`;
   }
   return `${x}, ${y}`;
@@ -1008,7 +999,7 @@ function canMineTarget(cell) {
   if (cell.type === 'tree') return G.area === 'forest';
   if (cell.type === 'wall') return G.area === 'mine';
   if (cell.type !== 'ore') return false;
-  const ore = ORES.find(o => o.id === cell.ore);
+  const ore = ORE_BY_ID[cell.ore];
   const pick = PICKAXES[G.pickaxeIdx];
   return pick.power >= ore.pickReq;
 }
@@ -1051,7 +1042,7 @@ function mineCell(tx, ty) {
   }
 
   if (cell.type === 'ore') {
-    const ore = ORES.find(o => o.id === cell.ore);
+    const ore = ORE_BY_ID[cell.ore];
     const pick = PICKAXES[G.pickaxeIdx];
     if (pick.power < ore.pickReq) {
       log(t('pickTooWeak', oreName(ore)), 'warn');
