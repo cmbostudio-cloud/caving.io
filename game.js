@@ -1121,6 +1121,13 @@ function pickaxeEntries() {
     .filter(pick => (G.ownedPickaxes || []).includes(pick.id));
 }
 
+
+function normalizedPickaxeIdx(value, ownedPickaxes = []) {
+  if (!Number.isInteger(value) || value < 0 || value >= PICKAXES.length) return null;
+  const pickaxe = PICKAXES[value];
+  return ownedPickaxes.includes(pickaxe.id) ? value : null;
+}
+
 function setInventoryTab(tab) {
   G.inventoryTab = tab === 'equipment' ? 'equipment' : 'items';
   renderInventoryOverlay();
@@ -1155,12 +1162,13 @@ function renderInventoryOverlay() {
 
   const stats = document.getElementById('inventory-stats-list');
   if (stats) {
+    const equippedIdx = normalizedPickaxeIdx(G.pickaxeIdx, G.ownedPickaxes || []);
     const rows = [
       [t('hp'), `${G.hp} / ${G.hpMax}`],
       [t('stamina'), `${G.stam} / ${G.stamMax}`],
       [t('exp'), `${G.xp} / ${G.xpNext}`],
       [t('level'), G.level],
-      [t('pickaxe'), G.pickaxeIdx == null ? '-' : PICKAXES[G.pickaxeIdx].name],
+      [t('pickaxe'), equippedIdx == null ? '-' : PICKAXES[equippedIdx].name],
       [t('area'), areaLabel()],
       [t('gold'), G.gold || 0],
     ];
@@ -1209,13 +1217,17 @@ function renderInventoryOverlay() {
 
   const slot = document.getElementById('pickaxe-slot');
   if (slot) {
-    const equipped = G.pickaxeIdx == null ? null : PICKAXES[G.pickaxeIdx];
-    slot.innerHTML = `
-          <div class="equipment-slot-label">${t('pickaxeSlot')}</div>
+    const equippedIdx = normalizedPickaxeIdx(G.pickaxeIdx, G.ownedPickaxes || []);
+    const equipped = equippedIdx == null ? null : PICKAXES[equippedIdx];
+    slot.innerHTML = equipped
+      ? `
           <div class="material-symbol" style="color:#cfd8dc">⛏</div>
-          <div class="material-name">${equipped ? equipped.name : t('equipEmpty')}</div>
-          <div class="pickaxe-power">${equipped ? `${t('equipped')} · PWR ${equipped.power}` : ''}</div>
-    `;
+          <div class="material-name">${equipped.name}</div>
+          <div class="pickaxe-power">PWR ${equipped.power}</div>
+        `
+      : `
+          <div class="material-symbol" style="color:#cfd8dc">⛏</div>
+        `;
   }
 }
 
@@ -1346,7 +1358,7 @@ function loadGame() {
       xp: saved.xp ?? 0,
       xpNext: saved.xpNext ?? 100,
       level: saved.level ?? 1,
-      pickaxeIdx: saved.pickaxeIdx ?? null,
+      pickaxeIdx: normalizedPickaxeIdx(saved.pickaxeIdx, Array.isArray(saved.ownedPickaxes) && saved.ownedPickaxes.length ? saved.ownedPickaxes : ['wood_pickaxe']),
       ownedPickaxes: Array.isArray(saved.ownedPickaxes) && saved.ownedPickaxes.length ? saved.ownedPickaxes : ['wood_pickaxe'],
       inventoryTab: saved.inventoryTab === 'equipment' ? 'equipment' : 'items',
       gold: saved.gold ?? 0,
