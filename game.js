@@ -24,7 +24,7 @@ const PLAZA_POINTS = {
   forestGate: { x: 24, y: 12 },
   forestReturn: { x: 23, y: 12 },
   shop: { x: 5, y: 5 },
-  anvil: { x: 5, y: 19 },
+workbench: { x: 5, y: 19 },
 };
 
 const SHOP_POINTS = {
@@ -45,7 +45,8 @@ const ORES = [
 ];
 
 const PICKAXES = [
-  { id: 'wood_pickaxe', name: 'Wood Pickaxe', power: 1 },
+  { id: 'wood_pickaxe', name: 'Wood Pickaxe', power: 1, description: 'Basic pickaxe. Can mine common ores.' },
+  { id: 'stone_pickaxe', name: 'Stone Pickaxe', power: 2, description: 'Stronger pickaxe. Can mine silver and gold.' },
 ];
 
 const MATERIALS = [
@@ -93,7 +94,7 @@ const I18N = {
     noSelection: 'NO TILE SELECTED', moving: 'MOVING', select: 'SELECT', enter: 'ENTER', move: 'MOVE',
     player: 'Player', wall: 'Wall', floor: 'Floor', stairs: 'Stairs', grass: 'Grass', tree: 'Tree',
     stone: 'Stone', flower: 'Flower', mineEntrance: 'Mine entrance', shop: 'Shop', shopExit: 'Shop exit',
-    anvil: 'Anvil', exchange: 'Exchange', forestGate: 'Forest gate', plazaGate: 'Plaza gate', plazaExit: 'Plaza exit',
+    workbench: 'Workbench', crafting: 'Crafting', craftWoodPickaxe: 'Craft Wood Pickaxe', craftStonePickaxe: 'Craft Stone Pickaxe', crafted: item => `Crafted ${item}.`, alreadyOwned: item => `Already own ${item}.`, notEnoughMaterials: 'Not enough materials.', exchange: 'Exchange', forestGate: 'Forest gate', plazaGate: 'Plaza gate', plazaExit: 'Plaza exit',
     interactHint: 'Select a tile to see actions.', moveHint: 'Tap tile to move.', enterHint: 'Press E or tap tile to enter.',
     mineHintAction: 'Press Space/Z or tap tile to mine.', noActionHint: 'No action available.',
     itemsTab: 'ITEMS', equipmentTab: 'EQUIPMENT', pickaxeSlot: 'PICKAXE SLOT', dragPickaxeHint: 'Drag a pickaxe card and drop it in the slot.',
@@ -130,7 +131,7 @@ const I18N = {
     noSelection: '선택한 타일 없음', moving: '이동 중', select: '선택', enter: '입장', move: '이동',
     player: '플레이어', wall: '벽', floor: '바닥', stairs: '계단', grass: '풀', tree: '나무',
     stone: '돌', flower: '꽃', mineEntrance: '광산 입구', shop: '상점', shopExit: '상점 출구',
-    anvil: '모루', exchange: '거래소', forestGate: '숲 입구', plazaGate: '광장 입구', plazaExit: '광장 출구',
+    workbench: '제작대', crafting: '제작', craftWoodPickaxe: '나무 곡괭이 제작', craftStonePickaxe: '돌 곡괭이 제작', crafted: item => `${item} 제작 완료.`, alreadyOwned: item => `${item}은 이미 보유 중이다.`, notEnoughMaterials: '재료가 부족하다.', exchange: '거래소', forestGate: '숲 입구', plazaGate: '광장 입구', plazaExit: '광장 출구',
     interactHint: '타일을 선택하면 행동 방법이 표시됩니다.', moveHint: '타일을 누르면 이동합니다.', enterHint: 'E 또는 타일 터치로 입장합니다.',
     mineHintAction: 'Space/Z 또는 타일 터치로 채굴합니다.', noActionHint: '가능한 행동이 없습니다.',
     itemsTab: '아이템', equipmentTab: '장비', pickaxeSlot: '곡괭이 슬롯', dragPickaxeHint: '곡괭이 카드를 드래그해서 슬롯에 장착하세요.',
@@ -586,10 +587,10 @@ function generatePlazaMap() {
   }
 
   setCell(map, PLAZA_POINTS.shop.x, PLAZA_POINTS.shop.y, { type: 'shop' });
-  setCell(map, PLAZA_POINTS.anvil.x, PLAZA_POINTS.anvil.y, { type: 'anvil' });
+  setCell(map, PLAZA_POINTS.workbench.x, PLAZA_POINTS.workbench.y, { type: 'workbench' });
   setCell(map, PLAZA_POINTS.forestGate.x, PLAZA_POINTS.forestGate.y, { type: 'forestGate' });
   setCell(map, PLAZA_POINTS.forestReturn.x, PLAZA_POINTS.forestReturn.y, { type: 'floor' });
-
+  migrateWorkbenchInMap(map);
   return map;
 }
 
@@ -716,6 +717,16 @@ function selectedTile() {
 }
 
 // ---- MAP HELPERS ----
+function migrateWorkbenchInMap(map) {
+  if (!Array.isArray(map)) return;
+  for (let y = 0; y < MAP_H; y++) {
+    for (let x = 0; x < MAP_W; x++) {
+      if (map[y]?.[x]?.type === 'anvil') map[y][x] = { type: 'workbench' };
+    }
+  }
+}
+
+
 function placeReachableStairs() {
   const visited = floodFill(G.map, G.px, G.py);
   const candidates = [];
@@ -766,6 +777,7 @@ function enterPlaza(entry = 'start') {
   stopAutoMove();
   G.area = 'plaza';
   if (!G.plazaMap) G.plazaMap = generatePlazaMap();
+  migrateWorkbenchInMap(G.plazaMap);
   G.map = G.plazaMap;
   G.selected = null;
 
@@ -827,8 +839,8 @@ function cellGlyph(cell, isPlayer) {
       return { ch: 'G', fg: '#ffd700', weight: 'bold' };
     case 'shopExit':
       return { ch: '<', fg: '#ff9800', weight: 'bold' };
-    case 'anvil':
-      return { ch: 'A', fg: '#cfd8dc', weight: 'bold' };
+    case 'workbench':
+      return { ch: 'W', fg: '#8d6e63', weight: 'bold' };
     case 'ore': {
       const ore = ORE_BY_ID[cell.ore];
       return { ch: ore.ch, fg: ore.fg, weight: 'normal' };
@@ -852,7 +864,7 @@ function tileLabel(cell, isPlayer, x, y) {
   if (cell.type === 'shop') return `${t('shop')} ${x}, ${y}`;
   if (cell.type === 'exchange') return `${t('exchange')} ${x}, ${y}`;
   if (cell.type === 'shopExit') return `${t('shopExit')} ${x}, ${y}`;
-  if (cell.type === 'anvil') return `${t('anvil')} ${x}, ${y}`;
+  if (cell.type === 'workbench') return `${t('workbench')} ${x}, ${y}`;
   if (cell.type === 'ore') {
     const ore = ORE_BY_ID[cell.ore];
     return `${oreName(ore)} ${x}, ${y}`;
@@ -861,11 +873,11 @@ function tileLabel(cell, isPlayer, x, y) {
 }
 
 function isWalkableCell(cell) {
-  return ['floor', 'stairs', 'grass', 'flower', 'mineEntrance', 'shop', 'shopExit', 'exchange', 'forestGate', 'plazaExit', 'anvil'].includes(cell.type);
+  return ['floor', 'stairs', 'grass', 'flower', 'mineEntrance', 'shop', 'shopExit', 'exchange', 'forestGate', 'plazaExit', 'workbench'].includes(cell.type);
 }
 
 function isPortalCell(cell) {
-  return ['stairs', 'mineEntrance', 'shop', 'shopExit', 'exchange', 'forestGate', 'plazaExit'].includes(cell.type);
+  return ['stairs', 'mineEntrance', 'shop', 'shopExit', 'exchange', 'forestGate', 'plazaExit', 'workbench'].includes(cell.type);
 }
 
 function areaLabel() {
@@ -962,6 +974,8 @@ function tryStairs() {
     toggleExchange(true);
   } else if (cell.type === 'shopExit') {
     enterPlaza('shop');
+  } else if (cell.type === 'workbench') {
+    toggleCrafting(true);
   } else {
     log(t('noEntrance'), 'sys');
   }
@@ -1137,13 +1151,21 @@ function setPickaxe(pickIdx) {
   if (pickIdx < 0 || pickIdx >= PICKAXES.length) return;
   const pickaxe = PICKAXES[pickIdx];
   if (!(G.ownedPickaxes || []).includes(pickaxe.id)) return;
-  if (G.pickaxeIdx === pickIdx) return;
+  if (G.pickaxeIdx === pickIdx) {
+    G.pickaxeIdx = null;
+    log(t('noPickaxeEquipped'), 'info');
+    render();
+    return;
+  }
   G.pickaxeIdx = pickIdx;
   log(t('equippedPickaxe', pickaxe.name), 'info');
   render();
 }
 
 function onPickaxeDragStart(event, pickIdx) {
+  if (G.pickaxeIdx === pickIdx) {
+    event.dataTransfer.effectAllowed = 'move';
+  }
   event.dataTransfer.setData('text/plain', String(pickIdx));
 }
 
@@ -1153,7 +1175,28 @@ function onPickaxeDrop(event) {
   if (slot) slot.classList.remove('is-drop-target');
   const pickIdx = Number(event.dataTransfer.getData('text/plain'));
   if (Number.isNaN(pickIdx)) return;
+  if (G.pickaxeIdx === pickIdx) {
+    G.pickaxeIdx = null;
+    log(t('noPickaxeEquipped'), 'info');
+    render();
+    return;
+  }
   setPickaxe(pickIdx);
+}
+
+function showPickaxeInfo(pickIdx) {
+  const pick = PICKAXES[pickIdx];
+  if (!pick) return;
+  log(`${pick.name}: ${pick.description} (Power ${pick.power})`, 'info');
+}
+
+function onPickaxeCardClick(event, pickIdx) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  setPickaxe(pickIdx);
+  showPickaxeInfo(pickIdx);
 }
 
 function renderInventoryOverlay() {
@@ -1197,7 +1240,7 @@ function renderInventoryOverlay() {
       const picks = pickaxeEntries();
       const equipSlots = Array.from({ length: 36 }, (_, idx) => picks[idx] || null);
       grid.innerHTML = equipSlots.map(pick => `
-        <div class="pickaxe-card ${pick && pick.idx === G.pickaxeIdx ? 'is-equipped' : ''}" ${pick ? `draggable="true" ondragstart="onPickaxeDragStart(event, ${pick.idx})"` : ''}>
+        <div class="pickaxe-card ${pick && pick.idx === G.pickaxeIdx ? 'is-equipped' : ''}" ${pick ? `draggable="true" ondragstart="onPickaxeDragStart(event, ${pick.idx})" onmouseenter="showPickaxeInfo(${pick.idx})" onclick="onPickaxeCardClick(event, ${pick.idx})" title="${pick.name} | Power ${pick.power}"` : ''}>
           <div class="material-symbol" style="color:${pick ? pick.fg : '#2a2a2a'}">${pick ? pick.ch : ''}</div>
           <div class="material-count">${pick && pick.idx === G.pickaxeIdx ? 'E' : ''}</div>
         </div>
@@ -1222,6 +1265,7 @@ function toggleInventory(forceOpen) {
   if (shouldOpen) {
     toggleSettings(false);
     toggleExchange(false);
+    toggleCrafting(false);
     renderInventoryOverlay();
   }
   overlay.toggleAttribute('hidden', !shouldOpen);
@@ -1235,6 +1279,7 @@ function toggleSettings(forceOpen) {
   if (shouldOpen) {
     toggleInventory(false);
     toggleExchange(false);
+    toggleCrafting(false);
   }
   overlay.toggleAttribute('hidden', !shouldOpen);
   if (button) button.setAttribute('aria-expanded', String(shouldOpen));
@@ -1286,6 +1331,31 @@ function sellItem(id, amount) {
   if (!qty || !value) return;
   G.inventory[id] = current - qty;
   G.gold = (G.gold || 0) + qty * value;
+  render();
+}
+
+
+function toggleCrafting(forceOpen) {
+  const overlay = document.getElementById('crafting-overlay');
+  if (!overlay) return;
+  const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : overlay.hasAttribute('hidden');
+  overlay.toggleAttribute('hidden', !shouldOpen);
+}
+
+function craftPickaxe(id) {
+  const pick = PICKAXES.find(p => p.id === id);
+  if (!pick) return;
+  if ((G.ownedPickaxes || []).includes(id)) { log(t('alreadyOwned', pick.name), 'warn'); return; }
+  if (id === 'wood_pickaxe') {
+    if ((G.inventory.wood_plank || 0) < 3) { log(t('notEnoughMaterials'), 'warn'); return; }
+    G.inventory.wood_plank -= 3;
+  }
+  if (id === 'stone_pickaxe') {
+    if ((G.inventory.wood_plank || 0) < 2 || (G.inventory.iron || 0) < 2) { log(t('notEnoughMaterials'), 'warn'); return; }
+    G.inventory.wood_plank -= 2; G.inventory.iron -= 2;
+  }
+  G.ownedPickaxes.push(id);
+  log(t('crafted', pick.name), 'ok');
   render();
 }
 
@@ -1355,6 +1425,8 @@ function loadGame() {
       plazaMap: saved.plazaMap || null,
       forestMap: saved.forestMap || null,
     };
+    migrateWorkbenchInMap(G.plazaMap);
+    migrateWorkbenchInMap(G.map);
     ORES.forEach(o => { if (G.inventory[o.id] == null) G.inventory[o.id] = 0; });
     MATERIALS.forEach(m => { if (G.inventory[m.id] == null) G.inventory[m.id] = 0; });
     render();
@@ -1451,6 +1523,7 @@ document.addEventListener('keydown', e => {
     toggleInventory(false);
     toggleSettings(false);
     toggleExchange(false);
+    toggleCrafting(false);
     return;
   }
   if (e.key === 'e' || e.key === 'E' || e.key === ' ') {
