@@ -94,11 +94,22 @@ body {
   color: var(--yellow);
 }
 
-#settings-btn {
+.title-actions {
   position: absolute;
   right: 0;
   top: 50%;
   transform: translateY(-50%);
+  display: flex;
+  gap: 6px;
+}
+
+#install-btn {
+  color: var(--amber);
+  border-color: var(--amber);
+}
+
+#install-btn,
+#settings-btn {
   background: transparent;
   border: 1px solid var(--border);
   color: var(--muted);
@@ -110,6 +121,8 @@ body {
   touch-action: manipulation;
 }
 
+#install-btn:hover,
+#install-btn:focus-visible,
 #settings-btn:hover,
 #settings-btn[aria-expanded="true"] {
   border-color: var(--amber);
@@ -1181,7 +1194,8 @@ body[data-layout="square"] #map-canvas {
     letter-spacing: 5px;
   }
 
-  #settings-btn {
+  #install-btn,
+#settings-btn {
     font-size: 9px;
     padding: 5px 7px;
   }

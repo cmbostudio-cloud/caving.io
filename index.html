@@ -5,7 +5,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>caving.io</title>
-  <link rel="icon" href="data:,">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="stylesheet" href="style.css">
 </head>
 
@@ -23,7 +28,10 @@
 
   <div id="title-bar">
     <div class="title-text">caving<span>.io</span></div>
-    <button id="settings-btn" type="button" onclick="toggleSettings()" aria-expanded="false">SET</button>
+    <div class="title-actions">
+      <button id="install-btn" type="button" onclick="installGame()" hidden>INSTALL</button>
+      <button id="settings-btn" type="button" onclick="toggleSettings()" aria-expanded="false">SET</button>
+    </div>
   </div>
 
   <!-- Settings Overlay (game.js의 toggleSettings()가 참조) -->
@@ -215,6 +223,7 @@
   </div>
 
   <script src="game.js"></script>
+  <script src="pwa.js"></script>
 </body>
 
 </html>
