@@ -1199,6 +1199,12 @@ function onPickaxeCardClick(event, pickIdx) {
   showPickaxeInfo(pickIdx);
 }
 
+function showPickaxeInfo(pickIdx) {
+  const pick = PICKAXES[pickIdx];
+  if (!pick) return;
+  log(`${pick.name}: ${pick.description} (Power ${pick.power})`, 'info');
+}
+
 function renderInventoryOverlay() {
   const overlay = document.getElementById('inventory-overlay');
   if (!overlay || !G.map) return;
