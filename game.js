@@ -45,11 +45,7 @@ const ORES = [
 ];
 
 const PICKAXES = [
-  { name: 'Wood Lv.1', level: 1, power: 1 },
-  { name: 'Stone Lv.2', level: 2, power: 2 },
-  { name: 'Iron Lv.3', level: 3, power: 3 },
-  { name: 'Gold Lv.4', level: 4, power: 4 },
-  { name: 'Diamond Lv.5', level: 5, power: 5 },
+  { id: 'wood_pickaxe', name: 'Wood Pickaxe', power: 1 },
 ];
 
 const MATERIALS = [
@@ -100,6 +96,8 @@ const I18N = {
     anvil: 'Anvil', exchange: 'Exchange', forestGate: 'Forest gate', plazaGate: 'Plaza gate', plazaExit: 'Plaza exit',
     interactHint: 'Select a tile to see actions.', moveHint: 'Tap tile to move.', enterHint: 'Press E or tap tile to enter.',
     mineHintAction: 'Press Space/Z or tap tile to mine.', noActionHint: 'No action available.',
+    itemsTab: 'ITEMS', equipmentTab: 'EQUIPMENT', pickaxeSlot: 'PICKAXE SLOT', dragPickaxeHint: 'Drag a pickaxe card and drop it in the slot.',
+    equipped: 'EQUIPPED', equipEmpty: 'No pickaxe equipped.', equippedPickaxe: pick => `Equipped pickaxe: ${pick}`, noPickaxeEquipped: 'No pickaxe equipped.',
     emptyInventory: '-- EMPTY --', exchangeEmpty: 'Nothing to exchange.', sellOne: 'SELL 1', sellAll: 'SELL ALL',
     moreInventory: count => `+${count} more. Press I to view.`, plaza: 'PLAZA', forest: 'FOREST', shopArea: 'SHOP', plazaMap: 'PLAZA MAP', forestMap: 'FOREST MAP',
     shopMap: 'SHOP MAP', dungeonMap: 'DUNGEON MAP',
@@ -135,6 +133,8 @@ const I18N = {
     anvil: '모루', exchange: '거래소', forestGate: '숲 입구', plazaGate: '광장 입구', plazaExit: '광장 출구',
     interactHint: '타일을 선택하면 행동 방법이 표시됩니다.', moveHint: '타일을 누르면 이동합니다.', enterHint: 'E 또는 타일 터치로 입장합니다.',
     mineHintAction: 'Space/Z 또는 타일 터치로 채굴합니다.', noActionHint: '가능한 행동이 없습니다.',
+    itemsTab: '아이템', equipmentTab: '장비', pickaxeSlot: '곡괭이 슬롯', dragPickaxeHint: '곡괭이 카드를 드래그해서 슬롯에 장착하세요.',
+    equipped: '장착 중', equipEmpty: '장착된 곡괭이가 없습니다.', equippedPickaxe: pick => `곡괭이 장착: ${pick}`, noPickaxeEquipped: '장착한 곡괭이가 없다.',
     emptyInventory: '-- 비어 있음 --', exchangeEmpty: '교환할 물건이 없습니다.', sellOne: '1개 판매', sellAll: '전부 판매',
     moreInventory: count => `외 ${count}개. I 키로 확인.`, plaza: '광장', forest: '숲', shopArea: '상점', plazaMap: '광장 지도', forestMap: '숲 지도',
     shopMap: '상점 지도', dungeonMap: '동굴 지도',
@@ -567,19 +567,6 @@ function checkLevelUp() {
   }
 }
 
-function upgradeCheck() {
-  const nextIdx = G.pickaxeIdx + 1;
-  if (nextIdx >= PICKAXES.length) return;
-  const threshold = nextIdx * 3;
-  if (G.depth >= threshold) {
-    G.pickaxeIdx = nextIdx;
-    log(t('pickUpgrade', PICKAXES[G.pickaxeIdx].name), 'info');
-  }
-}
-
-
-
-
 function generatePlazaMap() {
   const map = blankMap('floor');
 
@@ -750,7 +737,9 @@ function initGame() {
     stam: 100, stamMax: 100,
     xp: 0, xpNext: 100,
     level: 1,
-    pickaxeIdx: 0,
+    pickaxeIdx: null,
+    ownedPickaxes: ['wood_pickaxe'],
+    inventoryTab: 'items',
     gold: 0,
     inventory: {},
     map: null,
@@ -923,7 +912,8 @@ function render() {
   document.getElementById('stam-val').textContent = `${G.stam} / ${G.stamMax}`;
   document.getElementById('xp-val').textContent = `${G.xp} / ${G.xpNext}`;
   document.getElementById('lv-val').textContent = G.level;
-  document.getElementById('pick-val').textContent = PICKAXES[G.pickaxeIdx].name;
+  const equippedPick = G.pickaxeIdx == null ? null : PICKAXES[G.pickaxeIdx];
+  document.getElementById('pick-val').textContent = equippedPick ? equippedPick.name : '-';
   document.getElementById('depth-val').textContent = areaLabel();
   document.getElementById('gold-val').textContent = G.gold || 0;
   document.getElementById('map-title').textContent =
@@ -958,7 +948,6 @@ function tryStairs() {
   if (cell.type === 'stairs') {
     G.depth++;
     log(t('goingDown', G.depth), 'info');
-    upgradeCheck();
     newFloor();
   } else if (cell.type === 'mineEntrance') {
     log(t('enterMine'), 'info');
@@ -1000,7 +989,8 @@ function canMineTarget(cell) {
   if (cell.type === 'wall') return G.area === 'mine';
   if (cell.type !== 'ore') return false;
   const ore = ORE_BY_ID[cell.ore];
-  const pick = PICKAXES[G.pickaxeIdx];
+  const pick = G.pickaxeIdx == null ? null : PICKAXES[G.pickaxeIdx];
+  if (!pick) return false;
   return pick.power >= ore.pickReq;
 }
 
@@ -1043,7 +1033,11 @@ function mineCell(tx, ty) {
 
   if (cell.type === 'ore') {
     const ore = ORE_BY_ID[cell.ore];
-    const pick = PICKAXES[G.pickaxeIdx];
+    const pick = G.pickaxeIdx == null ? null : PICKAXES[G.pickaxeIdx];
+    if (!pick) {
+      log(t('noPickaxeEquipped'), 'warn');
+      return;
+    }
     if (pick.power < ore.pickReq) {
       log(t('pickTooWeak', oreName(ore)), 'warn');
       return;
@@ -1121,6 +1115,40 @@ function inventoryEntries() {
   ];
 }
 
+function pickaxeEntries() {
+  return PICKAXES
+    .map((pick, idx) => ({ ...pick, idx, ch: '⛏', fg: '#cfd8dc' }))
+    .filter(pick => (G.ownedPickaxes || []).includes(pick.id));
+}
+
+function setInventoryTab(tab) {
+  G.inventoryTab = tab === 'equipment' ? 'equipment' : 'items';
+  renderInventoryOverlay();
+}
+
+function setPickaxe(pickIdx) {
+  if (pickIdx < 0 || pickIdx >= PICKAXES.length) return;
+  const pickaxe = PICKAXES[pickIdx];
+  if (!(G.ownedPickaxes || []).includes(pickaxe.id)) return;
+  if (G.pickaxeIdx === pickIdx) return;
+  G.pickaxeIdx = pickIdx;
+  log(t('equippedPickaxe', pickaxe.name), 'info');
+  render();
+}
+
+function onPickaxeDragStart(event, pickIdx) {
+  event.dataTransfer.setData('text/plain', String(pickIdx));
+}
+
+function onPickaxeDrop(event) {
+  event.preventDefault();
+  const slot = document.getElementById('pickaxe-slot');
+  if (slot) slot.classList.remove('is-drop-target');
+  const pickIdx = Number(event.dataTransfer.getData('text/plain'));
+  if (Number.isNaN(pickIdx)) return;
+  setPickaxe(pickIdx);
+}
+
 function renderInventoryOverlay() {
   const overlay = document.getElementById('inventory-overlay');
   if (!overlay || !G.map) return;
@@ -1132,7 +1160,7 @@ function renderInventoryOverlay() {
       [t('stamina'), `${G.stam} / ${G.stamMax}`],
       [t('exp'), `${G.xp} / ${G.xpNext}`],
       [t('level'), G.level],
-      [t('pickaxe'), PICKAXES[G.pickaxeIdx].name],
+      [t('pickaxe'), G.pickaxeIdx == null ? '-' : PICKAXES[G.pickaxeIdx].name],
       [t('area'), areaLabel()],
       [t('gold'), G.gold || 0],
     ];
@@ -1146,16 +1174,50 @@ function renderInventoryOverlay() {
 
   const grid = document.getElementById('inventory-card-grid');
   if (grid) {
-    const entries = inventoryEntries().filter(item => item.count > 0);
-    grid.innerHTML = entries.length
-      ? entries.map(item => `
-        <div class="material-card">
-          <div class="material-symbol" style="color:${item.fg}">${item.ch}</div>
-          <div class="material-name">${item.name}</div>
-          <div class="material-count">${item.count}</div>
-        </div>
-      `).join('')
-      : `<div style="color:#333;font-size:11px;padding:4px 0">${t('emptyInventory')}</div>`;
+    const activeTab = G.inventoryTab === 'equipment' ? 'equipment' : 'items';
+    document.getElementById('inventory-tab-items')?.classList.toggle('active', activeTab === 'items');
+    document.getElementById('inventory-tab-equipment')?.classList.toggle('active', activeTab === 'equipment');
+    if (activeTab === 'items') {
+      const entries = inventoryEntries().filter(item => item.count > 0);
+      grid.innerHTML = entries.length
+        ? entries.map(item => `
+          <div class="material-card">
+            <div class="material-symbol" style="color:${item.fg}">${item.ch}</div>
+            <div class="material-name">${item.name}</div>
+            <div class="material-count">${item.count}</div>
+          </div>
+        `).join('')
+        : `<div style="color:#333;font-size:11px;padding:4px 0">${t('emptyInventory')}</div>`;
+      return;
+    }
+
+    const equipped = G.pickaxeIdx == null ? null : PICKAXES[G.pickaxeIdx];
+    const picks = pickaxeEntries();
+    grid.innerHTML = `
+      <div class="equipment-layout">
+        <div class="equipment-help">${t('dragPickaxeHint')}</div>
+        <div class="equipment-help">${t('pickaxeSlot')}</div>
+        ${picks.map(pick => `
+          <div class="pickaxe-card ${pick.idx === G.pickaxeIdx ? 'is-equipped' : ''}" draggable="true" ondragstart="onPickaxeDragStart(event, ${pick.idx})">
+            <div class="material-symbol" style="color:${pick.fg}">${pick.ch}</div>
+            <div class="material-name">${pick.name}</div>
+            <div class="pickaxe-power">PWR ${pick.power}</div>
+            <div class="material-count">${pick.idx === G.pickaxeIdx ? t('equipped') : ''}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  const slot = document.getElementById('pickaxe-slot');
+  if (slot) {
+    const equipped = G.pickaxeIdx == null ? null : PICKAXES[G.pickaxeIdx];
+    slot.innerHTML = `
+          <div class="equipment-slot-label">${t('pickaxeSlot')}</div>
+          <div class="material-symbol" style="color:#cfd8dc">⛏</div>
+          <div class="material-name">${equipped ? equipped.name : t('equipEmpty')}</div>
+          <div class="pickaxe-power">${equipped ? `${t('equipped')} · PWR ${equipped.power}` : ''}</div>
+    `;
   }
 }
 
@@ -1237,6 +1299,8 @@ function saveGame() {
       xpNext: G.xpNext,
       level: G.level,
       pickaxeIdx: G.pickaxeIdx,
+      ownedPickaxes: G.ownedPickaxes || [],
+      inventoryTab: G.inventoryTab === 'equipment' ? 'equipment' : 'items',
       gold: G.gold || 0,
       inventory: G.inventory,
       map: G.map,
@@ -1272,7 +1336,9 @@ function loadGame() {
       xp: saved.xp ?? 0,
       xpNext: saved.xpNext ?? 100,
       level: saved.level ?? 1,
-      pickaxeIdx: saved.pickaxeIdx ?? 0,
+      pickaxeIdx: saved.pickaxeIdx ?? null,
+      ownedPickaxes: Array.isArray(saved.ownedPickaxes) && saved.ownedPickaxes.length ? saved.ownedPickaxes : ['wood_pickaxe'],
+      inventoryTab: saved.inventoryTab === 'equipment' ? 'equipment' : 'items',
       gold: saved.gold ?? 0,
       inventory: saved.inventory || {},
       map: saved.map,
