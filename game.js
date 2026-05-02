@@ -98,7 +98,7 @@ const I18N = {
     mineHintAction: 'Press Space/Z or tap tile to mine.', noActionHint: 'No action available.',
     itemsTab: 'ITEMS', equipmentTab: 'EQUIPMENT', pickaxeSlot: 'PICKAXE SLOT', dragPickaxeHint: 'Drag a pickaxe card and drop it in the slot.',
     equipped: 'EQUIPPED', equipEmpty: 'No pickaxe equipped.', equippedPickaxe: pick => `Equipped pickaxe: ${pick}`, noPickaxeEquipped: 'No pickaxe equipped.',
-    emptyInventory: '-- EMPTY --', exchangeEmpty: 'Nothing to exchange.', sellOne: 'SELL 1', sellAll: 'SELL ALL',
+    emptyInventory: '-- EMPTY --', exchange: 'EXCHANGE', exchangeEmpty: 'Nothing to exchange.', sellOne: 'SELL 1', sellAll: 'SELL ALL',
     moreInventory: count => `+${count} more. Press I to view.`, plaza: 'PLAZA', forest: 'FOREST', shopArea: 'SHOP', plazaMap: 'PLAZA MAP', forestMap: 'FOREST MAP',
     shopMap: 'SHOP MAP', dungeonMap: 'DUNGEON MAP',
     enterFloor: depth => `Entered B${depth}F.`,
@@ -135,7 +135,7 @@ const I18N = {
     mineHintAction: 'Space/Z 또는 타일 터치로 채굴합니다.', noActionHint: '가능한 행동이 없습니다.',
     itemsTab: '아이템', equipmentTab: '장비', pickaxeSlot: '곡괭이 슬롯', dragPickaxeHint: '곡괭이 카드를 드래그해서 슬롯에 장착하세요.',
     equipped: '장착 중', equipEmpty: '장착된 곡괭이가 없습니다.', equippedPickaxe: pick => `곡괭이 장착: ${pick}`, noPickaxeEquipped: '장착한 곡괭이가 없다.',
-    emptyInventory: '-- 비어 있음 --', exchangeEmpty: '교환할 물건이 없습니다.', sellOne: '1개 판매', sellAll: '전부 판매',
+    emptyInventory: '-- 비어 있음 --', exchange: '거래소', exchangeEmpty: '교환할 물건이 없습니다.', sellOne: '1개 판매', sellAll: '전부 판매',
     moreInventory: count => `외 ${count}개. I 키로 확인.`, plaza: '광장', forest: '숲', shopArea: '상점', plazaMap: '광장 지도', forestMap: '숲 지도',
     shopMap: '상점 지도', dungeonMap: '동굴 지도',
     enterFloor: depth => `B${depth}F에 진입했다.`,
@@ -1223,8 +1223,12 @@ function toggleInventory(forceOpen) {
   const overlay = document.getElementById('inventory-overlay');
   if (!overlay) return;
   const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : overlay.hasAttribute('hidden');
+  if (shouldOpen) {
+    toggleSettings(false);
+    toggleExchange(false);
+    renderInventoryOverlay();
+  }
   overlay.toggleAttribute('hidden', !shouldOpen);
-  if (shouldOpen) renderInventoryOverlay();
 }
 
 function toggleSettings(forceOpen) {
@@ -1232,6 +1236,10 @@ function toggleSettings(forceOpen) {
   const button = document.getElementById('settings-btn');
   if (!overlay) return;
   const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : overlay.hasAttribute('hidden');
+  if (shouldOpen) {
+    toggleInventory(false);
+    toggleExchange(false);
+  }
   overlay.toggleAttribute('hidden', !shouldOpen);
   if (button) button.setAttribute('aria-expanded', String(shouldOpen));
 }
@@ -1267,7 +1275,11 @@ function toggleExchange(forceOpen) {
   const overlay = document.getElementById('exchange-overlay');
   if (!overlay) return;
   const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : overlay.hasAttribute('hidden');
-  if (shouldOpen) renderExchangeWindow();
+  if (shouldOpen) {
+    toggleInventory(false);
+    toggleSettings(false);
+    renderExchangeWindow();
+  }
   overlay.toggleAttribute('hidden', !shouldOpen);
 }
 
@@ -1439,6 +1451,12 @@ document.getElementById('map-canvas').addEventListener('pointerdown', e => {
 
 document.addEventListener('keydown', e => {
   if (G.gameOver) return;
+  if (e.key === 'Escape') {
+    toggleInventory(false);
+    toggleSettings(false);
+    toggleExchange(false);
+    return;
+  }
   if (e.key === 'e' || e.key === 'E' || e.key === ' ') {
     e.preventDefault();
     useSelectedTile();
