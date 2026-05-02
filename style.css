@@ -813,10 +813,11 @@ body[data-layout="square"] #map-canvas {
 .player-card {
   position: relative;
   display: grid;
-  place-items: center;
+  place-items: end center;
   border-bottom: 1px solid var(--border);
   min-height: 168px;
-  padding: 10px;
+  padding: 10px 10px 12px;
+  padding-top: 92px;
 }
 
 
@@ -824,10 +825,10 @@ body[data-layout="square"] #map-canvas {
   position: absolute;
   top: 10px;
   right: 10px;
-  width: 120px;
-  min-height: 86px;
-  padding: 8px;
-  gap: 4px;
+  width: 92px;
+  min-height: 64px;
+  padding: 6px;
+  gap: 2px;
 }
 
 .player-avatar {
@@ -1220,11 +1221,11 @@ body[data-layout="square"] #map-canvas {
 
   .player-card {
     min-height: 120px;
-    padding-top: 106px;
+    padding-top: 88px;
   }
 
   #pickaxe-slot.player-pickaxe-slot {
-    width: min(140px, calc(100% - 20px));
+    width: min(96px, calc(100% - 20px));
     right: 10px;
     top: 10px;
   }
