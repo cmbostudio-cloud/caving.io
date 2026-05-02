@@ -1166,7 +1166,19 @@ function onPickaxeDragStart(event, pickIdx) {
   if (G.pickaxeIdx === pickIdx) {
     event.dataTransfer.effectAllowed = 'move';
   }
+  event.dataTransfer.setData('source', 'inventory-card');
   event.dataTransfer.setData('text/plain', String(pickIdx));
+}
+
+function onEquippedPickaxeDragStart(event) {
+  const equipped = normalizedPickaxeIdx(G.pickaxeIdx, G.ownedPickaxes || []);
+  if (equipped == null) {
+    event.preventDefault();
+    return;
+  }
+  event.dataTransfer.effectAllowed = 'move';
+  event.dataTransfer.setData('source', 'equipped-slot');
+  event.dataTransfer.setData('text/plain', String(equipped));
 }
 
 function onPickaxeDrop(event) {
@@ -1176,6 +1188,27 @@ function onPickaxeDrop(event) {
   const pickIdx = Number(event.dataTransfer.getData('text/plain'));
   if (Number.isNaN(pickIdx)) return;
   if (G.pickaxeIdx === pickIdx) {
+    G.pickaxeIdx = null;
+    log(t('noPickaxeEquipped'), 'info');
+    render();
+    return;
+  }
+  setPickaxe(pickIdx);
+  showPickaxeInfo(pickIdx);
+}
+
+function showPickaxeInfo(pickIdx) {
+  const pick = PICKAXES[pickIdx];
+  if (!pick) return;
+  log(`${pick.name}: ${pick.description} (Power ${pick.power})`, 'info');
+}
+
+function onEquipmentSlotDrop(event) {
+  event.preventDefault();
+  const pickIdx = Number(event.dataTransfer.getData('text/plain'));
+  if (Number.isNaN(pickIdx)) return;
+  const source = event.dataTransfer.getData('source');
+  if (source === 'equipped-slot' && G.pickaxeIdx === pickIdx) {
     G.pickaxeIdx = null;
     log(t('noPickaxeEquipped'), 'info');
     render();
@@ -1197,12 +1230,6 @@ function onPickaxeCardClick(event, pickIdx) {
   }
   setPickaxe(pickIdx);
   showPickaxeInfo(pickIdx);
-}
-
-function showPickaxeInfo(pickIdx) {
-  const pick = PICKAXES[pickIdx];
-  if (!pick) return;
-  log(`${pick.name}: ${pick.description} (Power ${pick.power})`, 'info');
 }
 
 function renderInventoryOverlay() {
@@ -1246,7 +1273,7 @@ function renderInventoryOverlay() {
       const picks = pickaxeEntries();
       const equipSlots = Array.from({ length: 36 }, (_, idx) => picks[idx] || null);
       grid.innerHTML = equipSlots.map(pick => `
-        <div class="pickaxe-card ${pick && pick.idx === G.pickaxeIdx ? 'is-equipped' : ''}" ${pick ? `draggable="true" ondragstart="onPickaxeDragStart(event, ${pick.idx})" onmouseenter="showPickaxeInfo(${pick.idx})" onclick="onPickaxeCardClick(event, ${pick.idx})" title="${pick.name} | Power ${pick.power}"` : ''}>
+        <div class="pickaxe-card ${pick && pick.idx === G.pickaxeIdx ? 'is-equipped' : ''}" ondragover="event.preventDefault()" ondrop="onEquipmentSlotDrop(event)" ${pick ? `draggable="true" ondragstart="onPickaxeDragStart(event, ${pick.idx})" onmouseenter="showPickaxeInfo(${pick.idx})" onclick="onPickaxeCardClick(event, ${pick.idx})" title="${pick.name} | Power ${pick.power}"` : ''}>
           <div class="material-symbol" style="color:${pick ? pick.fg : '#2a2a2a'}">${pick ? pick.ch : ''}</div>
           <div class="material-count">${pick && pick.idx === G.pickaxeIdx ? 'E' : ''}</div>
         </div>
