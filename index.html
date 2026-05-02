@@ -127,14 +127,14 @@
 
 
   <div id="crafting-overlay" hidden>
-    <div id="exchange-window">
-      <div class="modal-head" style="padding:10px;border-bottom:1px solid var(--border)">
+    <div id="crafting-window">
+      <div class="modal-head crafting-head">
         <div class="panel-title" data-i18n="crafting">CRAFTING</div>
-        <button type="button" onclick="toggleCrafting(false)">✕</button>
+        <button class="modal-close" type="button" onclick="toggleCrafting(false)">✕</button>
       </div>
-      <div style="padding:10px;display:grid;gap:8px">
-        <button type="button" onclick="craftPickaxe('wood_pickaxe')" data-i18n="craftWoodPickaxe">나무 곡괭이 제작</button>
-        <button type="button" onclick="craftPickaxe('stone_pickaxe')" data-i18n="craftStonePickaxe">돌 곡괭이 제작</button>
+      <div class="crafting-list">
+        <button class="crafting-btn" type="button" onclick="craftPickaxe('wood_pickaxe')" data-i18n="craftWoodPickaxe">나무 곡괭이 제작</button>
+        <button class="crafting-btn" type="button" onclick="craftPickaxe('stone_pickaxe')" data-i18n="craftStonePickaxe">돌 곡괭이 제작</button>
       </div>
     </div>
   </div>

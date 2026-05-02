@@ -1163,6 +1163,9 @@ function setPickaxe(pickIdx) {
 }
 
 function onPickaxeDragStart(event, pickIdx) {
+  if (G.pickaxeIdx === pickIdx) {
+    event.dataTransfer.effectAllowed = 'move';
+  }
   event.dataTransfer.setData('text/plain', String(pickIdx));
 }
 
@@ -1179,6 +1182,21 @@ function onPickaxeDrop(event) {
     return;
   }
   setPickaxe(pickIdx);
+}
+
+function showPickaxeInfo(pickIdx) {
+  const pick = PICKAXES[pickIdx];
+  if (!pick) return;
+  log(`${pick.name}: ${pick.description} (Power ${pick.power})`, 'info');
+}
+
+function onPickaxeCardClick(event, pickIdx) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  setPickaxe(pickIdx);
+  showPickaxeInfo(pickIdx);
 }
 
 function showPickaxeInfo(pickIdx) {
@@ -1228,7 +1246,7 @@ function renderInventoryOverlay() {
       const picks = pickaxeEntries();
       const equipSlots = Array.from({ length: 36 }, (_, idx) => picks[idx] || null);
       grid.innerHTML = equipSlots.map(pick => `
-        <div class="pickaxe-card ${pick && pick.idx === G.pickaxeIdx ? 'is-equipped' : ''}" ${pick ? `draggable="true" ondragstart="onPickaxeDragStart(event, ${pick.idx})" onmouseenter="showPickaxeInfo(${pick.idx})" onclick="setPickaxe(${pick.idx});showPickaxeInfo(${pick.idx})" title="${pick.name} | Power ${pick.power}"` : ''}>
+        <div class="pickaxe-card ${pick && pick.idx === G.pickaxeIdx ? 'is-equipped' : ''}" ${pick ? `draggable="true" ondragstart="onPickaxeDragStart(event, ${pick.idx})" onmouseenter="showPickaxeInfo(${pick.idx})" onclick="onPickaxeCardClick(event, ${pick.idx})" title="${pick.name} | Power ${pick.power}"` : ''}>
           <div class="material-symbol" style="color:${pick ? pick.fg : '#2a2a2a'}">${pick ? pick.ch : ''}</div>
           <div class="material-count">${pick && pick.idx === G.pickaxeIdx ? 'E' : ''}</div>
         </div>

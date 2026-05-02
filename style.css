@@ -646,6 +646,49 @@ body[data-layout="square"] #map-canvas {
   overflow: hidden;
 }
 
+#crafting-window {
+  width: min(520px, 92vw);
+  max-height: min(560px, 86vh);
+  background: linear-gradient(180deg, #11100d 0%, #0b0b0b 100%);
+  border: 1px solid #3b2c15;
+  box-shadow: 0 0 0 1px #1a140a inset, 0 0 24px rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.crafting-head {
+  padding: 10px;
+  margin-bottom: 0;
+  border-bottom: 1px solid #3b2c15;
+}
+
+.crafting-list {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.crafting-btn {
+  background: rgba(255, 152, 0, 0.05);
+  border: 1px solid #3b2c15;
+  color: var(--text);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-align: left;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.crafting-btn:hover,
+.crafting-btn:focus-visible {
+  border-color: var(--amber);
+  color: var(--amber);
+  background: rgba(255, 152, 0, 0.12);
+  outline: none;
+}
+
 .exchange-summary {
   display: flex;
   justify-content: space-between;
