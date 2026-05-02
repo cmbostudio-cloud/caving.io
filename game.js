@@ -1186,39 +1186,31 @@ function renderInventoryOverlay() {
   document.getElementById('inventory-tab-equipment')?.classList.toggle('active', activeTab === 'equipment');
   if (grid) {
     if (activeTab === 'items') {
-      const entries = inventoryEntries().filter(item => item.count > 0);
-      grid.innerHTML = entries.length
-        ? entries.map(item => `
-          <div class="material-card">
-            <div class="material-symbol" style="color:${item.fg}">${item.ch}</div>
-            <div class="material-name">${item.name}</div>
-            <div class="material-count">${item.count}</div>
-          </div>
-        `).join('')
-        : `<div style="color:#333;font-size:11px;padding:4px 0">${t('emptyInventory')}</div>`;
+      const itemSlots = Array.from({ length: 36 }, (_, idx) => inventoryEntries().filter(item => item.count > 0)[idx] || null);
+      grid.innerHTML = itemSlots.map(item => `
+        <div class="material-card">
+          <div class="material-symbol" style="color:${item ? item.fg : '#2a2a2a'}">${item ? item.ch : ''}</div>
+          <div class="material-count">${item ? item.count : ''}</div>
+        </div>
+      `).join('');
     } else {
       const picks = pickaxeEntries();
-      grid.innerHTML = `
-        <div class="equipment-layout">
-          <div class="equipment-help">${t('dragPickaxeHint')}</div>
-          <div class="equipment-help">${t('pickaxeSlot')}</div>
-          ${picks.map(pick => `
-            <div class="pickaxe-card ${pick.idx === G.pickaxeIdx ? 'is-equipped' : ''}" draggable="true" ondragstart="onPickaxeDragStart(event, ${pick.idx})">
-              <div class="material-symbol" style="color:${pick.fg}">${pick.ch}</div>
-              <div class="material-name">${pick.name}</div>
-              <div class="pickaxe-power">PWR ${pick.power}</div>
-              <div class="material-count">${pick.idx === G.pickaxeIdx ? t('equipped') : ''}</div>
-            </div>
-          `).join('')}
+      const equipSlots = Array.from({ length: 36 }, (_, idx) => picks[idx] || null);
+      grid.innerHTML = equipSlots.map(pick => `
+        <div class="pickaxe-card ${pick && pick.idx === G.pickaxeIdx ? 'is-equipped' : ''}" ${pick ? `draggable="true" ondragstart="onPickaxeDragStart(event, ${pick.idx})"` : ''}>
+          <div class="material-symbol" style="color:${pick ? pick.fg : '#2a2a2a'}">${pick ? pick.ch : ''}</div>
+          <div class="material-count">${pick && pick.idx === G.pickaxeIdx ? 'E' : ''}</div>
         </div>
-      `;
+      `).join('');
     }
   }
 
   const slot = document.getElementById('pickaxe-slot');
   if (slot) {
+    const equipped = normalizedPickaxeIdx(G.pickaxeIdx, G.ownedPickaxes || []);
     slot.innerHTML = `
-      <div class="material-symbol" style="color:#cfd8dc">⛏</div>
+      <div class="material-symbol" style="color:#cfd8dc">${equipped == null ? '' : '⛏'}</div>
+      <div class="material-count">${equipped == null ? '' : '1'}</div>
     `;
   }
 }
