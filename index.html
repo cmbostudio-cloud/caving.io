@@ -78,6 +78,7 @@
         <div class="inventory-profile">
           <div class="player-card">
             <div id="pickaxe-slot" class="player-pickaxe-slot"
+              draggable="true" ondragstart="onEquippedPickaxeDragStart(event)"
               ondragover="event.preventDefault();this.classList.add('is-drop-target')"
               ondragleave="this.classList.remove('is-drop-target')" ondrop="onPickaxeDrop(event)">
             </div>
@@ -122,6 +123,20 @@
         <strong id="exchange-gold-val">0</strong>
       </div>
       <div id="exchange-list"></div>
+    </div>
+  </div>
+
+
+  <div id="crafting-overlay" hidden>
+    <div id="crafting-window">
+      <div class="modal-head crafting-head">
+        <div class="panel-title" data-i18n="crafting">CRAFTING</div>
+        <button class="modal-close" type="button" onclick="toggleCrafting(false)">✕</button>
+      </div>
+      <div class="crafting-list">
+        <button class="crafting-btn" type="button" onclick="craftPickaxe('wood_pickaxe')" data-i18n="craftWoodPickaxe">나무 곡괭이 제작</button>
+        <button class="crafting-btn" type="button" onclick="craftPickaxe('stone_pickaxe')" data-i18n="craftStonePickaxe">돌 곡괭이 제작</button>
+      </div>
     </div>
   </div>
 
