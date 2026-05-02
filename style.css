@@ -117,7 +117,8 @@ body {
 }
 
 #settings-overlay,
-#exchange-overlay {
+#exchange-overlay,
+#crafting-overlay {
   position: fixed;
   inset: 0;
   z-index: 92;
@@ -129,7 +130,8 @@ body {
 }
 
 #settings-overlay[hidden],
-#exchange-overlay[hidden] {
+#exchange-overlay[hidden],
+#crafting-overlay[hidden] {
   display: none;
 }
 
@@ -380,9 +382,16 @@ body[data-layout="square"] #map-canvas {
 .tile-shopExit,
 .tile-plazaExit,
 .tile-forestGate,
-.tile-anvil {
+.tile-anvil,
+.tile-workbench {
   background: rgba(255, 152, 0, 0.08);
 }
+
+
+#map-canvas.area-mine .tile-floor { background: rgba(42,42,42,0.18); }
+#map-canvas.area-mine .tile-wall { background: rgba(18,18,18,0.5); }
+#map-canvas.area-plaza .tile-floor { background: rgba(58,54,40,0.15); }
+#map-canvas.area-plaza .tile-wall { background: rgba(22,20,16,0.45); }
 
 .tile.selected .corner {
   position: absolute;
