@@ -1217,17 +1217,9 @@ function renderInventoryOverlay() {
 
   const slot = document.getElementById('pickaxe-slot');
   if (slot) {
-    const equippedIdx = normalizedPickaxeIdx(G.pickaxeIdx, G.ownedPickaxes || []);
-    const equipped = equippedIdx == null ? null : PICKAXES[equippedIdx];
-    slot.innerHTML = equipped
-      ? `
-          <div class="material-symbol" style="color:#cfd8dc">⛏</div>
-          <div class="material-name">${equipped.name}</div>
-          <div class="pickaxe-power">PWR ${equipped.power}</div>
-        `
-      : `
-          <div class="material-symbol" style="color:#cfd8dc">⛏</div>
-        `;
+    slot.innerHTML = `
+      <div class="material-symbol" style="color:#cfd8dc">⛏</div>
+    `;
   }
 }
 
