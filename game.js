@@ -94,7 +94,7 @@ const I18N = {
     noSelection: 'NO TILE SELECTED', moving: 'MOVING', select: 'SELECT', enter: 'ENTER', move: 'MOVE',
     player: 'Player', wall: 'Wall', floor: 'Floor', stairs: 'Stairs', grass: 'Grass', tree: 'Tree',
     stone: 'Stone', flower: 'Flower', mineEntrance: 'Mine entrance', shop: 'Shop', shopExit: 'Shop exit',
-    anvil: 'Anvil', workbench: 'Workbench', crafting: 'Crafting', craftWoodPickaxe: 'Craft Wood Pickaxe', craftStonePickaxe: 'Craft Stone Pickaxe', crafted: item => `Crafted ${item}.`, alreadyOwned: item => `Already own ${item}.`, notEnoughMaterials: 'Not enough materials.', exchange: 'Exchange', forestGate: 'Forest gate', plazaGate: 'Plaza gate', plazaExit: 'Plaza exit',
+    workbench: 'Workbench', crafting: 'Crafting', craftWoodPickaxe: 'Craft Wood Pickaxe', craftStonePickaxe: 'Craft Stone Pickaxe', crafted: item => `Crafted ${item}.`, alreadyOwned: item => `Already own ${item}.`, notEnoughMaterials: 'Not enough materials.', exchange: 'Exchange', forestGate: 'Forest gate', plazaGate: 'Plaza gate', plazaExit: 'Plaza exit',
     interactHint: 'Select a tile to see actions.', moveHint: 'Tap tile to move.', enterHint: 'Press E or tap tile to enter.',
     mineHintAction: 'Press Space/Z or tap tile to mine.', noActionHint: 'No action available.',
     itemsTab: 'ITEMS', equipmentTab: 'EQUIPMENT', pickaxeSlot: 'PICKAXE SLOT', dragPickaxeHint: 'Drag a pickaxe card and drop it in the slot.',
@@ -131,7 +131,7 @@ const I18N = {
     noSelection: '선택한 타일 없음', moving: '이동 중', select: '선택', enter: '입장', move: '이동',
     player: '플레이어', wall: '벽', floor: '바닥', stairs: '계단', grass: '풀', tree: '나무',
     stone: '돌', flower: '꽃', mineEntrance: '광산 입구', shop: '상점', shopExit: '상점 출구',
-    anvil: '모루', workbench: '제작대', crafting: '제작', craftWoodPickaxe: '나무 곡괭이 제작', craftStonePickaxe: '돌 곡괭이 제작', crafted: item => `${item} 제작 완료.`, alreadyOwned: item => `${item}은 이미 보유 중이다.`, notEnoughMaterials: '재료가 부족하다.', exchange: '거래소', forestGate: '숲 입구', plazaGate: '광장 입구', plazaExit: '광장 출구',
+    workbench: '제작대', crafting: '제작', craftWoodPickaxe: '나무 곡괭이 제작', craftStonePickaxe: '돌 곡괭이 제작', crafted: item => `${item} 제작 완료.`, alreadyOwned: item => `${item}은 이미 보유 중이다.`, notEnoughMaterials: '재료가 부족하다.', exchange: '거래소', forestGate: '숲 입구', plazaGate: '광장 입구', plazaExit: '광장 출구',
     interactHint: '타일을 선택하면 행동 방법이 표시됩니다.', moveHint: '타일을 누르면 이동합니다.', enterHint: 'E 또는 타일 터치로 입장합니다.',
     mineHintAction: 'Space/Z 또는 타일 터치로 채굴합니다.', noActionHint: '가능한 행동이 없습니다.',
     itemsTab: '아이템', equipmentTab: '장비', pickaxeSlot: '곡괭이 슬롯', dragPickaxeHint: '곡괭이 카드를 드래그해서 슬롯에 장착하세요.',
@@ -590,7 +590,7 @@ function generatePlazaMap() {
   setCell(map, PLAZA_POINTS.workbench.x, PLAZA_POINTS.workbench.y, { type: 'workbench' });
   setCell(map, PLAZA_POINTS.forestGate.x, PLAZA_POINTS.forestGate.y, { type: 'forestGate' });
   setCell(map, PLAZA_POINTS.forestReturn.x, PLAZA_POINTS.forestReturn.y, { type: 'floor' });
-
+  migrateWorkbenchInMap(map);
   return map;
 }
 
@@ -717,6 +717,16 @@ function selectedTile() {
 }
 
 // ---- MAP HELPERS ----
+function migrateWorkbenchInMap(map) {
+  if (!Array.isArray(map)) return;
+  for (let y = 0; y < MAP_H; y++) {
+    for (let x = 0; x < MAP_W; x++) {
+      if (map[y]?.[x]?.type === 'anvil') map[y][x] = { type: 'workbench' };
+    }
+  }
+}
+
+
 function placeReachableStairs() {
   const visited = floodFill(G.map, G.px, G.py);
   const candidates = [];
@@ -767,6 +777,7 @@ function enterPlaza(entry = 'start') {
   stopAutoMove();
   G.area = 'plaza';
   if (!G.plazaMap) G.plazaMap = generatePlazaMap();
+  migrateWorkbenchInMap(G.plazaMap);
   G.map = G.plazaMap;
   G.selected = null;
 
@@ -828,8 +839,6 @@ function cellGlyph(cell, isPlayer) {
       return { ch: 'G', fg: '#ffd700', weight: 'bold' };
     case 'shopExit':
       return { ch: '<', fg: '#ff9800', weight: 'bold' };
-    case 'anvil':
-      return { ch: 'A', fg: '#cfd8dc', weight: 'bold' };
     case 'workbench':
       return { ch: 'W', fg: '#8d6e63', weight: 'bold' };
     case 'ore': {
@@ -855,7 +864,6 @@ function tileLabel(cell, isPlayer, x, y) {
   if (cell.type === 'shop') return `${t('shop')} ${x}, ${y}`;
   if (cell.type === 'exchange') return `${t('exchange')} ${x}, ${y}`;
   if (cell.type === 'shopExit') return `${t('shopExit')} ${x}, ${y}`;
-  if (cell.type === 'anvil') return `${t('anvil')} ${x}, ${y}`;
   if (cell.type === 'workbench') return `${t('workbench')} ${x}, ${y}`;
   if (cell.type === 'ore') {
     const ore = ORE_BY_ID[cell.ore];
@@ -865,7 +873,7 @@ function tileLabel(cell, isPlayer, x, y) {
 }
 
 function isWalkableCell(cell) {
-  return ['floor', 'stairs', 'grass', 'flower', 'mineEntrance', 'shop', 'shopExit', 'exchange', 'forestGate', 'plazaExit', 'anvil', 'workbench'].includes(cell.type);
+  return ['floor', 'stairs', 'grass', 'flower', 'mineEntrance', 'shop', 'shopExit', 'exchange', 'forestGate', 'plazaExit', 'workbench'].includes(cell.type);
 }
 
 function isPortalCell(cell) {
@@ -1405,6 +1413,8 @@ function loadGame() {
       plazaMap: saved.plazaMap || null,
       forestMap: saved.forestMap || null,
     };
+    migrateWorkbenchInMap(G.plazaMap);
+    migrateWorkbenchInMap(G.map);
     ORES.forEach(o => { if (G.inventory[o.id] == null) G.inventory[o.id] = 0; });
     MATERIALS.forEach(m => { if (G.inventory[m.id] == null) G.inventory[m.id] = 0; });
     render();
