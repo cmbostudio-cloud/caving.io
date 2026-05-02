@@ -25,6 +25,8 @@
   --emerald: #26a69a;
   --ruby: #ef5350;
   --diamond: #80deea;
+  --inv-slot-size: 44px;
+  --inv-slot-gap: 6px;
 }
 
 * {
@@ -813,22 +815,16 @@ body[data-layout="square"] #map-canvas {
 .player-card {
   position: relative;
   display: grid;
-  place-items: end center;
+  place-items: center;
   border-bottom: 1px solid var(--border);
   min-height: 168px;
-  padding: 10px 10px 12px;
-  padding-top: 92px;
+  padding: 10px;
 }
-
 
 #pickaxe-slot.player-pickaxe-slot {
   position: absolute;
   top: 10px;
   right: 10px;
-  width: 92px;
-  min-height: 64px;
-  padding: 6px;
-  gap: 2px;
 }
 
 .player-avatar {
@@ -885,48 +881,51 @@ body[data-layout="square"] #map-canvas {
 
 #inventory-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(9, var(--inv-slot-size));
+  grid-auto-rows: var(--inv-slot-size);
+  justify-content: start;
+  gap: var(--inv-slot-gap);
   overflow-y: auto;
   max-height: calc(min(720px, 92vh) - 82px);
   padding-right: 2px;
 }
 
 .material-card {
+  width: var(--inv-slot-size);
+  height: var(--inv-slot-size);
   border: 1px solid var(--border);
   background: #0d0d0d;
-  min-height: 96px;
-  padding: 10px;
+  padding: 4px;
   display: grid;
-  grid-template-rows: auto 1fr auto;
-  gap: 8px;
+  grid-template-rows: 1fr auto;
+  align-items: center;
 }
 
 .material-symbol {
-  font-size: 24px;
+  font-size: 18px;
   line-height: 1;
+  text-align: center;
 }
 
 .material-name {
-  color: var(--text);
-  font-size: 11px;
+  display: none;
 }
 
 .material-count {
   color: var(--bright);
-  font-size: 18px;
+  font-size: 11px;
   text-align: right;
+  line-height: 1;
 }
 
 .player-pickaxe-slot {
-  width: 100%;
-  min-height: 120px;
-  border: 1px dashed var(--border);
+  width: var(--inv-slot-size);
+  height: var(--inv-slot-size);
+  border: 1px solid var(--border);
   background: #0d0d0d;
-  padding: 10px;
+  padding: 4px;
   display: grid;
-  align-content: start;
-  gap: 6px;
+  grid-template-rows: 1fr auto;
 }
 
 .player-pickaxe-slot.is-drop-target {
@@ -960,13 +959,13 @@ body[data-layout="square"] #map-canvas {
 }
 
 .pickaxe-card {
+  width: var(--inv-slot-size);
+  height: var(--inv-slot-size);
   border: 1px solid var(--border);
   background: #0d0d0d;
-  min-height: 96px;
-  padding: 10px;
+  padding: 4px;
   display: grid;
-  grid-template-rows: auto auto 1fr auto;
-  gap: 8px;
+  grid-template-rows: 1fr auto;
   cursor: grab;
 }
 
@@ -1221,13 +1220,6 @@ body[data-layout="square"] #map-canvas {
 
   .player-card {
     min-height: 120px;
-    padding-top: 88px;
-  }
-
-  #pickaxe-slot.player-pickaxe-slot {
-    width: min(96px, calc(100% - 20px));
-    right: 10px;
-    top: 10px;
   }
 
   .player-avatar {
