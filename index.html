@@ -64,7 +64,15 @@
     <div id="inventory-window">
       <div class="inventory-head">
         <div class="panel-title" data-i18n="inventory">INVENTORY</div>
-        <button id="inventory-close" type="button" onclick="toggleInventory(false)">✕</button>
+        <div class="inventory-head-actions">
+          <div class="inventory-tabs" role="tablist" aria-label="Inventory tabs">
+            <button id="inventory-tab-items" type="button" role="tab" class="inventory-tab active" data-i18n="itemsTab"
+              onclick="setInventoryTab('items')">ITEMS</button>
+            <button id="inventory-tab-equipment" type="button" role="tab" class="inventory-tab" data-i18n="equipmentTab"
+              onclick="setInventoryTab('equipment')">EQUIPMENT</button>
+          </div>
+          <button id="inventory-close" type="button" onclick="toggleInventory(false)">✕</button>
+        </div>
       </div>
       <div class="inventory-body">
         <div class="inventory-profile">
