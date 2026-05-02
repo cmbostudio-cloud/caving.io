@@ -1194,6 +1194,13 @@ function onPickaxeDrop(event) {
     return;
   }
   setPickaxe(pickIdx);
+  showPickaxeInfo(pickIdx);
+}
+
+function showPickaxeInfo(pickIdx) {
+  const pick = PICKAXES[pickIdx];
+  if (!pick) return;
+  log(`${pick.name}: ${pick.description} (Power ${pick.power})`, 'info');
 }
 
 function onEquipmentSlotDrop(event) {
