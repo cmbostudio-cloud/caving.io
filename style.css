@@ -745,6 +745,40 @@ body[data-layout="square"] #map-canvas {
   outline: none;
 }
 
+.inventory-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inventory-tabs {
+  display: inline-flex;
+  border: 1px solid var(--border);
+}
+
+.inventory-tab {
+  background: transparent;
+  border: 0;
+  border-right: 1px solid var(--border);
+  color: var(--muted);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  padding: 7px 10px;
+  cursor: pointer;
+}
+
+.inventory-tab:last-child {
+  border-right: 0;
+}
+
+.inventory-tab.active,
+.inventory-tab:hover,
+.inventory-tab:focus-visible {
+  color: var(--amber);
+  outline: none;
+}
+
 #inventory-close {
   width: 30px;
   height: 30px;
@@ -870,6 +904,70 @@ body[data-layout="square"] #map-canvas {
   color: var(--bright);
   font-size: 18px;
   text-align: right;
+}
+
+.player-pickaxe-slot {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 110px;
+  min-height: 78px;
+  border: 1px dashed var(--border);
+  background: #0d0d0d;
+  padding: 6px;
+  display: grid;
+  grid-template-rows: auto auto auto;
+  gap: 4px;
+}
+
+.player-pickaxe-slot.is-drop-target {
+  border-color: var(--amber);
+}
+
+.equipment-layout {
+  display: grid;
+  gap: 10px;
+}
+
+.equipment-help {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+
+.equipment-slot-label {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+
+.equipment-empty {
+  color: #444;
+  font-size: 11px;
+}
+
+.equipment-slot.is-drop-target {
+  border-color: var(--amber);
+}
+
+.pickaxe-card {
+  border: 1px solid var(--border);
+  background: #0d0d0d;
+  min-height: 96px;
+  padding: 10px;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 8px;
+  cursor: grab;
+}
+
+.pickaxe-card.is-equipped {
+  border-color: var(--amber);
+}
+
+.pickaxe-power {
+  color: var(--muted);
+  font-size: 10px;
 }
 
 .player-pickaxe-slot {
