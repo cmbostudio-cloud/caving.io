@@ -777,6 +777,7 @@ body[data-layout="square"] #map-canvas {
 }
 
 .player-card {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -871,6 +872,24 @@ body[data-layout="square"] #map-canvas {
   text-align: right;
 }
 
+.player-pickaxe-slot {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 110px;
+  min-height: 78px;
+  border: 1px dashed var(--border);
+  background: #0d0d0d;
+  padding: 6px;
+  display: grid;
+  grid-template-rows: auto auto auto;
+  gap: 4px;
+}
+
+.player-pickaxe-slot.is-drop-target {
+  border-color: var(--amber);
+}
+
 .equipment-layout {
   display: grid;
   gap: 10px;
@@ -880,16 +899,6 @@ body[data-layout="square"] #map-canvas {
   color: var(--muted);
   font-size: 10px;
   letter-spacing: 1px;
-}
-
-.equipment-slot {
-  border: 1px dashed var(--border);
-  background: #0d0d0d;
-  min-height: 132px;
-  padding: 10px;
-  display: grid;
-  grid-template-rows: auto auto 1fr auto;
-  gap: 8px;
 }
 
 .equipment-slot-label {

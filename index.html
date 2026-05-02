@@ -77,6 +77,10 @@
       <div class="inventory-body">
         <div class="inventory-profile">
           <div class="player-card">
+            <div id="pickaxe-slot" class="player-pickaxe-slot"
+              ondragover="event.preventDefault();this.classList.add('is-drop-target')"
+              ondragleave="this.classList.remove('is-drop-target')" ondrop="onPickaxeDrop(event)">
+            </div>
             <div class="player-avatar">
               <!-- 7x7 pixel avatar grid -->
               <span></span><span></span><span class="on"></span><span class="on"></span><span
