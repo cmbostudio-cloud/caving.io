@@ -100,6 +100,8 @@ const I18N = {
     anvil: 'Anvil', exchange: 'Exchange', forestGate: 'Forest gate', plazaGate: 'Plaza gate', plazaExit: 'Plaza exit',
     interactHint: 'Select a tile to see actions.', moveHint: 'Tap tile to move.', enterHint: 'Press E or tap tile to enter.',
     mineHintAction: 'Press Space/Z or tap tile to mine.', noActionHint: 'No action available.',
+    itemsTab: 'ITEMS', equipmentTab: 'EQUIPMENT', pickaxeSlot: 'PICKAXE SLOT', dragPickaxeHint: 'Drag a pickaxe card and drop it in the slot.',
+    equipped: 'EQUIPPED', equipEmpty: 'No pickaxe equipped.', equippedPickaxe: pick => `Equipped pickaxe: ${pick}`,
     emptyInventory: '-- EMPTY --', exchangeEmpty: 'Nothing to exchange.', sellOne: 'SELL 1', sellAll: 'SELL ALL',
     moreInventory: count => `+${count} more. Press I to view.`, plaza: 'PLAZA', forest: 'FOREST', shopArea: 'SHOP', plazaMap: 'PLAZA MAP', forestMap: 'FOREST MAP',
     shopMap: 'SHOP MAP', dungeonMap: 'DUNGEON MAP',
@@ -135,6 +137,8 @@ const I18N = {
     anvil: '모루', exchange: '거래소', forestGate: '숲 입구', plazaGate: '광장 입구', plazaExit: '광장 출구',
     interactHint: '타일을 선택하면 행동 방법이 표시됩니다.', moveHint: '타일을 누르면 이동합니다.', enterHint: 'E 또는 타일 터치로 입장합니다.',
     mineHintAction: 'Space/Z 또는 타일 터치로 채굴합니다.', noActionHint: '가능한 행동이 없습니다.',
+    itemsTab: '아이템', equipmentTab: '장비', pickaxeSlot: '곡괭이 슬롯', dragPickaxeHint: '곡괭이 카드를 드래그해서 슬롯에 장착하세요.',
+    equipped: '장착 중', equipEmpty: '장착된 곡괭이가 없습니다.', equippedPickaxe: pick => `곡괭이 장착: ${pick}`,
     emptyInventory: '-- 비어 있음 --', exchangeEmpty: '교환할 물건이 없습니다.', sellOne: '1개 판매', sellAll: '전부 판매',
     moreInventory: count => `외 ${count}개. I 키로 확인.`, plaza: '광장', forest: '숲', shopArea: '상점', plazaMap: '광장 지도', forestMap: '숲 지도',
     shopMap: '상점 지도', dungeonMap: '동굴 지도',
@@ -751,6 +755,7 @@ function initGame() {
     xp: 0, xpNext: 100,
     level: 1,
     pickaxeIdx: 0,
+    inventoryTab: 'items',
     gold: 0,
     inventory: {},
     map: null,
@@ -1121,6 +1126,36 @@ function inventoryEntries() {
   ];
 }
 
+function pickaxeEntries() {
+  return PICKAXES.map((pick, idx) => ({ ...pick, idx, ch: '⛏', fg: '#cfd8dc' }));
+}
+
+function setInventoryTab(tab) {
+  G.inventoryTab = tab === 'equipment' ? 'equipment' : 'items';
+  renderInventoryOverlay();
+}
+
+function setPickaxe(pickIdx) {
+  if (pickIdx < 0 || pickIdx >= PICKAXES.length) return;
+  if (G.pickaxeIdx === pickIdx) return;
+  G.pickaxeIdx = pickIdx;
+  log(t('equippedPickaxe', PICKAXES[pickIdx].name), 'info');
+  render();
+}
+
+function onPickaxeDragStart(event, pickIdx) {
+  event.dataTransfer.setData('text/plain', String(pickIdx));
+}
+
+function onPickaxeDrop(event) {
+  event.preventDefault();
+  const slot = document.getElementById('pickaxe-slot');
+  if (slot) slot.classList.remove('is-drop-target');
+  const pickIdx = Number(event.dataTransfer.getData('text/plain'));
+  if (Number.isNaN(pickIdx)) return;
+  setPickaxe(pickIdx);
+}
+
 function renderInventoryOverlay() {
   const overlay = document.getElementById('inventory-overlay');
   if (!overlay || !G.map) return;
@@ -1146,16 +1181,44 @@ function renderInventoryOverlay() {
 
   const grid = document.getElementById('inventory-card-grid');
   if (grid) {
-    const entries = inventoryEntries().filter(item => item.count > 0);
-    grid.innerHTML = entries.length
-      ? entries.map(item => `
-        <div class="material-card">
-          <div class="material-symbol" style="color:${item.fg}">${item.ch}</div>
-          <div class="material-name">${item.name}</div>
-          <div class="material-count">${item.count}</div>
+    const activeTab = G.inventoryTab === 'equipment' ? 'equipment' : 'items';
+    document.getElementById('inventory-tab-items')?.classList.toggle('active', activeTab === 'items');
+    document.getElementById('inventory-tab-equipment')?.classList.toggle('active', activeTab === 'equipment');
+    if (activeTab === 'items') {
+      const entries = inventoryEntries().filter(item => item.count > 0);
+      grid.innerHTML = entries.length
+        ? entries.map(item => `
+          <div class="material-card">
+            <div class="material-symbol" style="color:${item.fg}">${item.ch}</div>
+            <div class="material-name">${item.name}</div>
+            <div class="material-count">${item.count}</div>
+          </div>
+        `).join('')
+        : `<div style="color:#333;font-size:11px;padding:4px 0">${t('emptyInventory')}</div>`;
+      return;
+    }
+
+    const equipped = PICKAXES[G.pickaxeIdx];
+    const picks = pickaxeEntries();
+    grid.innerHTML = `
+      <div class="equipment-layout">
+        <div class="equipment-help">${t('dragPickaxeHint')}</div>
+        <div id="pickaxe-slot" class="equipment-slot" ondragover="event.preventDefault();this.classList.add('is-drop-target')" ondragleave="this.classList.remove('is-drop-target')" ondrop="onPickaxeDrop(event)">
+          <div class="equipment-slot-label">${t('pickaxeSlot')}</div>
+          <div class="material-symbol" style="color:#cfd8dc">⛏</div>
+          <div class="material-name">${equipped ? equipped.name : t('equipEmpty')}</div>
+          <div class="pickaxe-power">${equipped ? `${t('equipped')} · PWR ${equipped.power}` : ''}</div>
         </div>
-      `).join('')
-      : `<div style="color:#333;font-size:11px;padding:4px 0">${t('emptyInventory')}</div>`;
+        ${picks.map(pick => `
+          <div class="pickaxe-card ${pick.idx === G.pickaxeIdx ? 'is-equipped' : ''}" draggable="true" ondragstart="onPickaxeDragStart(event, ${pick.idx})">
+            <div class="material-symbol" style="color:${pick.fg}">${pick.ch}</div>
+            <div class="material-name">${pick.name}</div>
+            <div class="pickaxe-power">PWR ${pick.power}</div>
+            <div class="material-count">${pick.idx === G.pickaxeIdx ? t('equipped') : ''}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
   }
 }
 
@@ -1237,6 +1300,7 @@ function saveGame() {
       xpNext: G.xpNext,
       level: G.level,
       pickaxeIdx: G.pickaxeIdx,
+      inventoryTab: G.inventoryTab === 'equipment' ? 'equipment' : 'items',
       gold: G.gold || 0,
       inventory: G.inventory,
       map: G.map,
@@ -1273,6 +1337,7 @@ function loadGame() {
       xpNext: saved.xpNext ?? 100,
       level: saved.level ?? 1,
       pickaxeIdx: saved.pickaxeIdx ?? 0,
+      inventoryTab: saved.inventoryTab === 'equipment' ? 'equipment' : 'items',
       gold: saved.gold ?? 0,
       inventory: saved.inventory || {},
       map: saved.map,
