@@ -33,14 +33,14 @@ const SHOP_POINTS = {
 };
 
 const ORES = [
-  { id: 'coal', ch: 'c', name: '석탄', fg: '#607d8b', minDepth: 1, weight: 60, xp: 2, depthReq: 1 },
-  { id: 'iron', ch: 'i', name: '철광석', fg: '#90a4ae', minDepth: 1, weight: 50, xp: 5, depthReq: 1 },
-  { id: 'copper', ch: 'u', name: '구리', fg: '#ff7043', minDepth: 2, weight: 40, xp: 8, depthReq: 1 },
-  { id: 'silver', ch: 's', name: '은', fg: '#cfd8dc', minDepth: 3, weight: 25, xp: 15, depthReq: 2 },
-  { id: 'gold', ch: 'o', name: '금', fg: '#ffd700', minDepth: 4, weight: 15, xp: 25, depthReq: 2 },
-  { id: 'emerald', ch: 'e', name: '에메랄드', fg: '#26a69a', minDepth: 5, weight: 10, xp: 40, depthReq: 3 },
-  { id: 'ruby', ch: 'r', name: '루비', fg: '#ef5350', minDepth: 6, weight: 7, xp: 55, depthReq: 3 },
-  { id: 'diamond', ch: 'd', name: '다이아몬드', fg: '#80deea', minDepth: 7, weight: 3, xp: 80, depthReq: 4 },
+  { id: 'coal', ch: 'c', name: '석탄', fg: '#607d8b', minDepth: 1, weight: 60, xp: 2, depthReq: 1, hardness: 2 },
+  { id: 'iron', ch: 'i', name: '철광석', fg: '#90a4ae', minDepth: 1, weight: 50, xp: 5, depthReq: 1, hardness: 2 },
+  { id: 'copper', ch: 'u', name: '구리', fg: '#ff7043', minDepth: 2, weight: 40, xp: 8, depthReq: 1, hardness: 2 },
+  { id: 'silver', ch: 's', name: '은', fg: '#cfd8dc', minDepth: 3, weight: 25, xp: 15, depthReq: 2, hardness: 4 },
+  { id: 'gold', ch: 'o', name: '금', fg: '#ffd700', minDepth: 4, weight: 15, xp: 25, depthReq: 2, hardness: 4 },
+  { id: 'emerald', ch: 'e', name: '에메랄드', fg: '#26a69a', minDepth: 5, weight: 10, xp: 40, depthReq: 3, hardness: 6 },
+  { id: 'ruby', ch: 'r', name: '루비', fg: '#ef5350', minDepth: 6, weight: 7, xp: 55, depthReq: 3, hardness: 6 },
+  { id: 'diamond', ch: 'd', name: '다이아몬드', fg: '#80deea', minDepth: 7, weight: 3, xp: 80, depthReq: 4, hardness: 8 },
 ];
 
 const MATERIALS = [
@@ -314,7 +314,7 @@ function generateMap(depth) {
           for (const ore of available) {
             r -= ore.weight;
             if (r <= 0) {
-              map[y][x] = { type: 'ore', ore: ore.id };
+              map[y][x] = { type: 'ore', ore: ore.id, hp: ore.hardness, maxHp: ore.hardness };
               break;
             }
           }
@@ -726,9 +726,9 @@ function initGame() {
     stam: 100, stamMax: 100,
     xp: 0, xpNext: 100,
     level: 1,
-    miningSpeed: 1,
+    attackDamage: 1,
+    attackSpeed: 1,
     goldMult: 1,
-    depthAccess: 1,
     statPoints: 0,
     gold: 0,
     map: null,
@@ -838,10 +838,7 @@ function tileLabel(cell, isPlayer, x, y) {
   if (cell.type === 'shop') return `${t('shop')} ${x}, ${y}`;
   if (cell.type === 'shopExit') return `${t('shopExit')} ${x}, ${y}`;
   if (cell.type === 'academy') return `${t('academy')} ${x}, ${y}`;
-  if (cell.type === 'ore') {
-    const ore = ORE_BY_ID[cell.ore];
-    return `${oreName(ore)} ${x}, ${y}`;
-  }
+  if (cell.type === 'ore') return `${oreName(ORE_BY_ID[cell.ore])} ${x}, ${y}`;
   return `${x}, ${y}`;
 }
 
@@ -897,7 +894,7 @@ function render() {
   document.getElementById('stam-val').textContent = `${G.stam} / ${G.stamMax}`;
   document.getElementById('xp-val').textContent = `${G.xp} / ${G.xpNext}`;
   document.getElementById('lv-val').textContent = G.level;
-  document.getElementById('pick-val').textContent = `SPD x${G.miningSpeed.toFixed(1)} / GOLD x${G.goldMult.toFixed(1)} / DEPTH B${G.depthAccess}`;
+  document.getElementById('pick-val').textContent = `DMG ${G.attackDamage.toFixed(1)} / ASPD ${G.attackSpeed.toFixed(1)} / GOLD x${G.goldMult.toFixed(1)}`;
   document.getElementById('depth-val').textContent = areaLabel();
   document.getElementById('gold-val').textContent = G.gold || 0;
   const sp = document.getElementById('stat-points-val');
@@ -959,8 +956,7 @@ function canMineTarget(cell) {
   if (cell.type === 'tree') return G.area === 'forest';
   if (cell.type === 'wall') return G.area === 'mine';
   if (cell.type !== 'ore') return false;
-  const ore = ORE_BY_ID[cell.ore];
-  return G.depthAccess >= ore.depthReq;
+  return true;
 }
 
 function mineCell(tx, ty) {
@@ -1003,19 +999,21 @@ function mineCell(tx, ty) {
 
   if (cell.type === 'ore') {
     const ore = ORE_BY_ID[cell.ore];
-    if (G.depthAccess < ore.depthReq) {
-      log(t('pickTooWeak', oreName(ore)), 'warn');
-      return;
-    }
-    const stamCost = Math.max(2, Math.round(7 - G.miningSpeed));
+    const stamCost = Math.max(1, Math.round(6 - G.attackSpeed));
     if (G.stam < stamCost) {
       log(t('lowStaminaMine'), 'warn');
       return;
     }
     G.stam = Math.max(0, G.stam - stamCost);
-
+    const nextHp = Math.max(0, (cell.hp ?? ore.hardness) - G.attackDamage);
+    if (nextHp > 0) {
+      G.map[ty][tx] = { ...cell, hp: nextHp, maxHp: cell.maxHp ?? ore.hardness };
+      tick(Math.max(1, Math.round(3 - G.attackSpeed)));
+      render();
+      return;
+    }
     G.map[ty][tx] = { type: 'floor' };
-    const amount = Math.max(1, Math.round(rnd(1, 2) * G.miningSpeed));
+    const amount = 1;
     const xpGain = ore.xp * amount;
     const goldGain = Math.max(1, Math.round((SELL_VALUES[ore.id] || 1) * amount * G.goldMult));
     G.gold += goldGain;
@@ -1023,7 +1021,7 @@ function mineCell(tx, ty) {
     log(`${t('oreGained', oreName(ore), amount, xpGain)} (+${goldGain}G)`, 'ok');
 
     checkLevelUp();
-    tick(3);
+    tick(Math.max(1, Math.round(3 - G.attackSpeed)));
     render();
   }
 }
@@ -1103,7 +1101,7 @@ function toggleCrafting(forceOpen) {
 }
 
 function craftPickaxe(id) {
-  const cfg = { mining_speed:{cost:100, apply:()=>G.miningSpeed=Number((G.miningSpeed+0.2).toFixed(1))}, gold_mult:{cost:150, apply:()=>G.goldMult=Number((G.goldMult+0.2).toFixed(1))}, depth_access:{cost:200, apply:()=>G.depthAccess=Math.min(9,G.depthAccess+1)} };
+  const cfg = { damage:{cost:100, apply:()=>G.attackDamage=Number((G.attackDamage+0.2).toFixed(1))}, attack_speed:{cost:150, apply:()=>G.attackSpeed=Number((G.attackSpeed+0.2).toFixed(1))}, gold_mult:{cost:180, apply:()=>G.goldMult=Number((G.goldMult+0.2).toFixed(1))} };
   const up = cfg[id];
   if (!up) return;
   if (G.gold < up.cost) { log(t('notEnoughMaterials'), 'warn'); return; }
@@ -1116,11 +1114,9 @@ function craftPickaxe(id) {
 function allocateStat(stat) {
   if (!G.map || G.gameOver) return;
   if ((G.statPoints || 0) <= 0) return;
-  if (stat === 'hp') { G.hpMax += 10; G.hp = Math.min(G.hpMax, G.hp + 10); }
-  else if (stat === 'stamina') { G.stamMax += 10; G.stam = Math.min(G.stamMax, G.stam + 10); }
-  else if (stat === 'mining_speed') { G.miningSpeed = Number((G.miningSpeed + 0.1).toFixed(1)); }
+  if (stat === 'damage') { G.attackDamage = Number((G.attackDamage + 0.1).toFixed(1)); }
+  else if (stat === 'attack_speed') { G.attackSpeed = Number((G.attackSpeed + 0.1).toFixed(1)); }
   else if (stat === 'gold_mult') { G.goldMult = Number((G.goldMult + 0.1).toFixed(1)); }
-  else if (stat === 'depth_access') { G.depthAccess = Math.min(9, G.depthAccess + 1); }
   else return;
   G.statPoints -= 1;
   render();
@@ -1141,9 +1137,9 @@ function saveGame() {
       xp: G.xp,
       xpNext: G.xpNext,
       level: G.level,
-        miningSpeed: G.miningSpeed,
+        attackDamage: G.attackDamage,
+      attackSpeed: G.attackSpeed,
       goldMult: G.goldMult,
-      depthAccess: G.depthAccess,
       statPoints: G.statPoints || 0,
       gold: G.gold || 0,
       map: G.map,
@@ -1179,9 +1175,9 @@ function loadGame() {
       xp: saved.xp ?? 0,
       xpNext: saved.xpNext ?? 100,
       level: saved.level ?? 1,
-        miningSpeed: Number(saved.miningSpeed) || 1,
+        attackDamage: Number(saved.attackDamage) || 1,
+      attackSpeed: Number(saved.attackSpeed) || 1,
       goldMult: Number(saved.goldMult) || 1,
-      depthAccess: Number(saved.depthAccess) || 1,
       statPoints: saved.statPoints ?? 0,
       gold: saved.gold ?? 0,
       map: saved.map,

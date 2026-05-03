@@ -74,9 +74,9 @@
         <button class="modal-close" type="button" onclick="toggleCrafting(false)">✕</button>
       </div>
       <div class="crafting-list">
-        <button class="crafting-btn" type="button" onclick="craftPickaxe('mining_speed')">채굴 속도 강화 (100G)</button>
-        <button class="crafting-btn" type="button" onclick="craftPickaxe('gold_mult')">골드 배율 강화 (150G)</button>
-        <button class="crafting-btn" type="button" onclick="craftPickaxe('depth_access')">층 접근 강화 (200G)</button>
+        <button class="crafting-btn" type="button" onclick="craftPickaxe('damage')">데미지 강화 (100G)</button>
+        <button class="crafting-btn" type="button" onclick="craftPickaxe('gold_mult')">획득 골드 강화 (180G)</button>
+        <button class="crafting-btn" type="button" onclick="craftPickaxe('attack_speed')">공격 속도 강화 (150G)</button>
       </div>
     </div>
   </div>
@@ -148,11 +148,9 @@
       <div class="panel-title">STAT POINTS</div>
       <div class="stat-row"><span class="stat-label">POINTS</span><span class="stat-val" id="stat-points-val">0</span></div>
       <div id="stat-alloc-list">
-        <button class="action-btn" type="button" onclick="allocateStat('hp')">HP +10</button>
-        <button class="action-btn" type="button" onclick="allocateStat('stamina')">STAMINA +10</button>
-        <button class="action-btn" type="button" onclick="allocateStat('mining_speed')">SPD +0.1</button>
-        <button class="action-btn" type="button" onclick="allocateStat('gold_mult')">GOLD +0.1</button>
-        <button class="action-btn" type="button" onclick="allocateStat('depth_access')">DEPTH +1</button>
+        <div class="alloc-row"><span>데미지 증가</span><button type="button" class="alloc-plus" onclick="allocateStat('damage')">[+]</button></div>
+        <div class="alloc-row"><span>공격 속도 증가</span><button type="button" class="alloc-plus" onclick="allocateStat('attack_speed')">[+]</button></div>
+        <div class="alloc-row"><span>획득 골드 비율 증가</span><button type="button" class="alloc-plus" onclick="allocateStat('gold_mult')">[+]</button></div>
       </div>
     </div>
 
