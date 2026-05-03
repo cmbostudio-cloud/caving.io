@@ -94,75 +94,40 @@
       <div class="panel-title" id="map-title">FOREST MAP</div>
       <div id="map-canvas"></div>
       <canvas id="mini-map" width="88" height="88" aria-label="Mini map"></canvas>
-    </div>
+      <button id="return-link" type="button" data-i18n="return" onclick="tryReturn()">RETURN (R)</button>
 
-    <div class="panel" id="stats-panel">
-      <div class="panel-title" data-i18n="status">STATUS</div>
-
-      <div class="stat-row">
-        <span class="stat-label" data-i18n="hp">HP</span>
-        <span class="stat-val" id="hp-val">100 / 100</span>
-      </div>
-      <div class="bar-wrap">
-        <div class="bar-fill bar-hp" id="hp-bar" style="width:100%"></div>
-      </div>
-
-      <div class="stat-row">
-        <span class="stat-label" data-i18n="stamina">STAMINA</span>
-        <span class="stat-val" id="stam-val">100 / 100</span>
-      </div>
-      <div class="bar-wrap">
-        <div class="bar-fill bar-stam" id="stam-bar" style="width:100%"></div>
+      <div id="alloc-panel" class="hud-box">
+        <button id="alloc-toggle" class="text-toggle" type="button" onclick="toggleStatPoints()" aria-expanded="true" data-i18n="statPoints">STAT POINTS</button>
+        <div class="stat-row"><span class="stat-label" data-i18n="points">POINTS</span><span class="stat-val" id="stat-points-val">0</span></div>
+        <div id="stat-alloc-list" class="open">
+          <div class="alloc-row"><span data-i18n="statDamage">Damage Up</span><button type="button" class="alloc-plus" onclick="allocateStat('damage')">[+]</button></div>
+          <div class="alloc-row"><span data-i18n="statAttackSpeed">Attack Speed Up</span><button type="button" class="alloc-plus" onclick="allocateStat('attack_speed')">[+]</button></div>
+          <div class="alloc-row"><span data-i18n="statGoldMult">Gold Rate Up</span><button type="button" class="alloc-plus" onclick="allocateStat('gold_mult')">[+]</button></div>
+        </div>
       </div>
 
-      <div class="stat-row">
-        <span class="stat-label" data-i18n="exp">EXP</span>
-        <span class="stat-val" id="xp-val">0 / 100</span>
-      </div>
-      <div class="bar-wrap">
-        <div class="bar-fill bar-xp" id="xp-bar" style="width:0%"></div>
-      </div>
-
-      <div class="stat-row" style="margin-top:4px">
-        <span class="stat-label" data-i18n="level">LEVEL</span>
-        <span class="stat-val" id="lv-val">1</span>
-      </div>
-      <div class="stat-row">
-        <span class="stat-label" data-i18n="power">POWER</span>
-        <span class="stat-val" id="pick-val">Wood Lv.1</span>
-      </div>
-      <div class="stat-row">
-        <span class="stat-label" data-i18n="area">AREA</span>
-        <span class="stat-val" id="depth-val">FOREST</span>
-      </div>
-      <!-- gold-val: game.js의 render()가 참조 (원본 score-val 대신) -->
-      <div class="stat-row">
-        <span class="stat-label" data-i18n="gold">GOLD</span>
-        <span class="stat-val" id="gold-val">0</span>
+      <div class="hud-box" id="stats-panel">
+        <div class="panel-title" data-i18n="status">STATUS</div>
+        <div class="stat-row"><span class="stat-label" data-i18n="hp">HP</span><span class="stat-val" id="hp-val">100 / 100</span></div>
+        <div class="bar-wrap"><div class="bar-fill bar-hp" id="hp-bar" style="width:100%"></div></div>
+        <div class="stat-row"><span class="stat-label" data-i18n="stamina">STAMINA</span><span class="stat-val" id="stam-val">100 / 100</span></div>
+        <div class="bar-wrap"><div class="bar-fill bar-stam" id="stam-bar" style="width:100%"></div></div>
+        <div class="stat-row"><span class="stat-label" data-i18n="exp">EXP</span><span class="stat-val" id="xp-val">0 / 100</span></div>
+        <div class="bar-wrap"><div class="bar-fill bar-xp" id="xp-bar" style="width:0%"></div></div>
+        <div class="stat-row" style="margin-top:4px"><span class="stat-label" data-i18n="level">LEVEL</span><span class="stat-val" id="lv-val">1</span></div>
+        <div class="stat-row"><span class="stat-label" data-i18n="power">POWER</span><span class="stat-val" id="pick-val">Wood Lv.1</span></div>
+        <div class="stat-row"><span class="stat-label" data-i18n="area">AREA</span><span class="stat-val" id="depth-val">FOREST</span></div>
+        <div class="stat-row"><span class="stat-label" data-i18n="gold">GOLD</span><span class="stat-val" id="gold-val">0</span></div>
       </div>
 
-    </div>
-
-    <div class="panel" id="action-panel">
-      <div class="panel-title" data-i18n="action">ACTION</div>
-      <div id="selection-info">NO TILE SELECTED</div>
-      <div class="action-grid">
-        <button class="action-btn" type="button" data-i18n="return" onclick="tryReturn()">RETURN (R)</button>
-        
-      </div>
-    </div>
-
-    <div class="panel" id="alloc-panel">
-      <div class="panel-title" data-i18n="statPoints">STAT POINTS</div>
-      <div class="stat-row"><span class="stat-label" data-i18n="points">POINTS</span><span class="stat-val" id="stat-points-val">0</span></div>
-      <div id="stat-alloc-list">
-        <div class="alloc-row"><span data-i18n="statDamage">Damage Up</span><button type="button" class="alloc-plus" onclick="allocateStat('damage')">[+]</button></div>
-        <div class="alloc-row"><span data-i18n="statAttackSpeed">Attack Speed Up</span><button type="button" class="alloc-plus" onclick="allocateStat('attack_speed')">[+]</button></div>
-        <div class="alloc-row"><span data-i18n="statGoldMult">Gold Rate Up</span><button type="button" class="alloc-plus" onclick="allocateStat('gold_mult')">[+]</button></div>
+      <div id="status-panel" class="hud-box">
+        <div class="panel-title" data-i18n="status">STATUS</div>
+        <div id="selection-info">NO TILE SELECTED</div>
       </div>
     </div>
 
   </div>
+</div>
 
   <script src="game.js"></script>
   <script src="pwa.js"></script>
