@@ -86,6 +86,7 @@ const ORE_NAMES = {
 const I18N = {
   en: {
     loading: 'LOADING', settings: 'SETTINGS', settingsShort: 'SET', install: 'INSTALL', layout: 'LAYOUT', classic: 'CLASSIC', square: 'SQUARE', saveLoad: 'SAVE/LOAD',
+    miniMap: 'MINIMAP', on: 'ON', off: 'OFF',
     language: 'LANGUAGE', status: 'STATUS', hp: 'HP', stamina: 'STAMINA', exp: 'EXP', level: 'LEVEL',
     power: 'POWER', area: 'AREA', gold: 'GOLD', statPoints: 'STAT POINTS', points: 'POINTS', statDamage: 'Damage Up', statAttackSpeed: 'Attack Speed Up', statGoldMult: 'Gold Rate Up', upgradeDamage: 'Damage Upgrade (100G)', upgradeGoldMult: 'Gold Gain Upgrade (180G)', upgradeAttackSpeed: 'Attack Speed Upgrade (150G)', inventory: 'INVENTORY', inventoryButton: 'INVENTORY (I)', saveButton: 'SAVE (K)', loadButton: 'LOAD (L)', materials: 'MATERIALS', action: 'ACTION',
     use: 'USE', mine: 'MINE', return: 'RETURN (R)', rest: 'REST', log: 'LOG',
@@ -124,6 +125,7 @@ const I18N = {
   },
   ko: {
     loading: '로딩 중', settings: '설정', settingsShort: '설정', install: '설치', layout: '배치', classic: '기본', square: '정사각', saveLoad: '저장/불러오기',
+    miniMap: '미니맵', on: '켜기', off: '끄기',
     language: '언어', status: '상태', hp: '체력', stamina: '스태미나', exp: '경험치', level: '레벨',
     power: '능력', area: '지역', gold: '골드', statPoints: '스탯 포인트', points: '포인트', statDamage: '데미지 증가', statAttackSpeed: '공격 속도 증가', statGoldMult: '획득 골드 비율 증가', upgradeDamage: '데미지 강화 (100G)', upgradeGoldMult: '획득 골드 강화 (180G)', upgradeAttackSpeed: '공격 속도 강화 (150G)', inventory: '인벤토리', inventoryButton: '인벤토리 (I)', saveButton: '저장 (K)', loadButton: '불러오기 (L)', materials: '재료', action: '행동',
     use: '사용', mine: '채굴', return: '귀환 (R)', rest: '휴식', log: '기록',
@@ -190,9 +192,10 @@ function loadSettings() {
     return {
       layoutMode: saved.layoutMode === 'square' ? 'square' : 'classic',
       language: saved.language === 'ko' ? 'ko' : 'en',
+      minimapEnabled: saved.minimapEnabled !== false,
     };
   } catch {
-    return { layoutMode: 'classic', language: 'en' };
+    return { layoutMode: 'classic', language: 'en', minimapEnabled: true };
   }
 }
 
@@ -221,6 +224,10 @@ function applyLanguage() {
   document.querySelectorAll('[data-lang-option]').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.langOption === lang());
   });
+  document.querySelectorAll('[data-minimap-option]').forEach(btn => {
+    const enabled = SETTINGS.minimapEnabled !== false;
+    btn.classList.toggle('active', (btn.dataset.minimapOption === 'on') === enabled);
+  });
   const upgradeLabelKey = {
     damage: 'upgradeDamage',
     gold_mult: 'upgradeGoldMult',
@@ -246,6 +253,13 @@ function setLanguage(language) {
   applyLanguage();
 }
 
+function setMinimapEnabled(enabled) {
+  SETTINGS.minimapEnabled = enabled !== false;
+  saveSettings();
+  applyLanguage();
+  if (G.map) render();
+}
+
 
 function syncViewportHeight() {
   const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
@@ -264,6 +278,7 @@ applyLanguage();
 
 const UI = {
   mapCanvas: () => document.getElementById('map-canvas'),
+  miniMap: () => document.getElementById('mini-map'),
   hpVal: () => document.getElementById('hp-val'),
   stamVal: () => document.getElementById('stam-val'),
   xpVal: () => document.getElementById('xp-val'),
@@ -967,7 +982,51 @@ function render() {
   UI.hpBar().style.width = (G.hp / G.hpMax * 100) + '%';
   UI.stamBar().style.width = (G.stam / G.stamMax * 100) + '%';
   UI.xpBar().style.width = (G.xp / G.xpNext * 100) + '%';
+  renderMiniMap();
 
+}
+
+function minimapColor(cell) {
+  if (!cell) return '#000';
+  if (cell.type === 'wall') return '#111';
+  if (cell.type === 'ore') return '#6f8a96';
+  if (cell.type === 'floor') return '#404040';
+  if (cell.type === 'grass') return '#22542a';
+  if (cell.type === 'tree') return '#2e7d32';
+  if (cell.type === 'flower') return '#e5dc54';
+  if (cell.type === 'stairs') return '#ff9800';
+  if (cell.type === 'mineEntrance') return '#ff9800';
+  if (cell.type === 'forestGate' || cell.type === 'plazaExit' || cell.type === 'shopExit') return '#ff9800';
+  if (cell.type === 'shop' || cell.type === 'academy') return '#ffd700';
+  return '#505050';
+}
+
+function renderMiniMap() {
+  const mini = UI.miniMap();
+  if (!mini || !G.map) return;
+  mini.hidden = SETTINGS.minimapEnabled === false;
+  if (mini.hidden) return;
+  const ctx = mini.getContext('2d');
+  if (!ctx) return;
+  const w = mini.width;
+  const h = mini.height;
+  ctx.clearRect(0, 0, w, h);
+  const cw = w / MAP_W;
+  const ch = h / MAP_H;
+  for (let y = 0; y < MAP_H; y++) {
+    for (let x = 0; x < MAP_W; x++) {
+      ctx.fillStyle = minimapColor(G.map[y][x]);
+      ctx.fillRect(x * cw, y * ch, Math.ceil(cw), Math.ceil(ch));
+    }
+  }
+  ctx.strokeStyle = '#a0a0a0';
+  ctx.strokeRect(0, 0, w, h);
+  const view = getViewportBounds();
+  ctx.strokeStyle = '#ffeb3b';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(view.startX * cw, view.startY * ch, VIEW_SIZE * cw, VIEW_SIZE * ch);
+  ctx.fillStyle = '#ff4444';
+  ctx.fillRect(G.px * cw, G.py * ch, Math.max(2, cw), Math.max(2, ch));
 }
 
 function tryStairs() {

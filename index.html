@@ -64,6 +64,13 @@
           <button type="button" data-i18n="loadButton" onclick="manualLoad()">LOAD (L)</button>
         </div>
       </div>
+      <div class="settings-row">
+        <span class="settings-label" data-i18n="miniMap">MINIMAP</span>
+        <div class="segmented" role="group" aria-label="Minimap">
+          <button type="button" data-minimap-option="on" data-i18n="on" onclick="setMinimapEnabled(true)">ON</button>
+          <button type="button" data-minimap-option="off" data-i18n="off" onclick="setMinimapEnabled(false)">OFF</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -86,6 +93,7 @@
     <div class="panel" id="map-panel">
       <div class="panel-title" id="map-title">FOREST MAP</div>
       <div id="map-canvas"></div>
+      <canvas id="mini-map" width="88" height="88" aria-label="Mini map"></canvas>
     </div>
 
     <div class="panel" id="stats-panel">
