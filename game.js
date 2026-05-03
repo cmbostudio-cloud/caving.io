@@ -6,6 +6,9 @@ const MAP_SIZE = 30;
 const VIEW_SIZE = 9;
 const MAP_W = MAP_SIZE;
 const MAP_H = MAP_SIZE;
+const MAP_LAST_X = MAP_W - 1;
+const MAP_LAST_Y = MAP_H - 1;
+const MAP_MID_Y = Math.floor(MAP_H / 2);
 
 const TILES = {
   WALL: { ch: '#', fg: '#333333' },
@@ -15,17 +18,17 @@ const TILES = {
 };
 
 const FOREST_POINTS = {
-  spawn: { x: 1, y: 12 },
-  plazaExit: { x: 0, y: 12 },
-  mine: { x: 18, y: 12 },
+  spawn: { x: 1, y: MAP_MID_Y },
+  plazaExit: { x: 0, y: MAP_MID_Y },
+  mine: { x: MAP_W - 7, y: MAP_MID_Y },
 };
 
 const PLAZA_POINTS = {
-  spawn: { x: 12, y: 12 },
-  forestGate: { x: 24, y: 12 },
-  forestReturn: { x: 23, y: 12 },
+  spawn: { x: Math.floor(MAP_W / 2), y: MAP_MID_Y },
+  forestGate: { x: MAP_LAST_X - 1, y: MAP_MID_Y },
+  forestReturn: { x: MAP_LAST_X - 2, y: MAP_MID_Y },
   shop: { x: 5, y: 5 },
-academy: { x: 5, y: 19 },
+academy: { x: 5, y: MAP_H - 6 },
 };
 
 const SHOP_POINTS = {
@@ -600,11 +603,11 @@ function generatePlazaMap() {
     }
   }
 
-  for (let x = 4; x <= 20; x++) {
-    setCell(map, x, 12, { type: 'floor' });
+  for (let x = 4; x <= PLAZA_POINTS.forestGate.x; x++) {
+    setCell(map, x, MAP_MID_Y, { type: 'floor' });
   }
-  for (let y = 8; y <= 16; y++) {
-    setCell(map, 12, y, { type: 'floor' });
+  for (let y = MAP_MID_Y - 4; y <= MAP_MID_Y + 4; y++) {
+    setCell(map, PLAZA_POINTS.spawn.x, y, { type: 'floor' });
   }
 
   setCell(map, PLAZA_POINTS.shop.x, PLAZA_POINTS.shop.y, { type: 'shop' });
