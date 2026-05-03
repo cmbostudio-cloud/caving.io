@@ -2,9 +2,13 @@
 //  caving.io -- ASCII mining roguelite
 // ============================================================
 
-const MAP_SIZE = 25;
+const MAP_SIZE = 30;
+const VIEW_SIZE = 11;
 const MAP_W = MAP_SIZE;
 const MAP_H = MAP_SIZE;
+const MAP_LAST_X = MAP_W - 1;
+const MAP_LAST_Y = MAP_H - 1;
+const MAP_MID_Y = Math.floor(MAP_H / 2);
 
 const TILES = {
   WALL: { ch: '#', fg: '#333333' },
@@ -14,17 +18,17 @@ const TILES = {
 };
 
 const FOREST_POINTS = {
-  spawn: { x: 1, y: 12 },
-  plazaExit: { x: 0, y: 12 },
-  mine: { x: 18, y: 12 },
+  spawn: { x: 1, y: MAP_MID_Y },
+  plazaExit: { x: 0, y: MAP_MID_Y },
+  mine: { x: MAP_W - 7, y: MAP_MID_Y },
 };
 
 const PLAZA_POINTS = {
-  spawn: { x: 12, y: 12 },
-  forestGate: { x: 24, y: 12 },
-  forestReturn: { x: 23, y: 12 },
+  spawn: { x: Math.floor(MAP_W / 2), y: MAP_MID_Y },
+  forestGate: { x: MAP_LAST_X - 1, y: MAP_MID_Y },
+  forestReturn: { x: MAP_LAST_X - 2, y: MAP_MID_Y },
   shop: { x: 5, y: 5 },
-academy: { x: 5, y: 19 },
+academy: { x: 5, y: MAP_H - 6 },
 };
 
 const SHOP_POINTS = {
@@ -91,6 +95,7 @@ const I18N = {
     academy: 'Academy', upgrades: 'Upgrades', craftWoodPickaxe: 'Craft Wood Pickaxe', craftStonePickaxe: 'Craft Stone Pickaxe', craftWoodPickaxeReq: 'Craft Wood Pickaxe (Needs: Wood Plank x5)', craftStonePickaxeReq: 'Craft Stone Pickaxe (Needs: Wood Pickaxe + Iron x5 + Coal x3)', crafted: item => `Crafted ${item}.`, alreadyOwned: item => `Already own ${item}.`, notEnoughMaterials: 'Not enough materials.', exchange: 'Exchange', forestGate: 'Forest gate', plazaGate: 'Plaza gate', plazaExit: 'Plaza exit',
     interactHint: 'Select a tile to see actions.', moveHint: 'Tap tile to move.', enterHint: 'Press E or tap tile to enter.',
     mineHintAction: 'Press Space/Z or tap tile to mine.', noActionHint: 'No action available.',
+    oreHp: (hp, maxHp) => `ORE HP ${hp}/${maxHp}`,
     itemsTab: 'ITEMS', equipmentTab: 'EQUIPMENT', pickaxeSlot: 'PICKAXE SLOT', dragPickaxeHint: 'Drag a pickaxe card and drop it in the slot.',
     equipped: 'EQUIPPED', equipEmpty: 'No pickaxe equipped.', equippedPickaxe: pick => `Equipped pickaxe: ${pick}`, noPickaxeEquipped: 'No pickaxe equipped.',
     emptyInventory: '-- EMPTY --', exchange: 'EXCHANGE', exchangeEmpty: 'Nothing to exchange.', sellOne: 'SELL 1', sellAll: 'SELL ALL',
@@ -128,6 +133,7 @@ const I18N = {
     academy: '훈련소', upgrades: '강화', craftWoodPickaxe: '나무 곡괭이 제작', craftStonePickaxe: '돌 곡괭이 제작', craftWoodPickaxeReq: '나무 곡괭이 제작 (재료: 나무판자 5개)', craftStonePickaxeReq: '돌 곡괭이 제작 (재료: 나무 곡괭이 + 철광석 5개 + 석탄 3개)', crafted: item => `${item} 제작 완료.`, alreadyOwned: item => `${item}은 이미 보유 중이다.`, notEnoughMaterials: '재료가 부족하다.', exchange: '거래소', forestGate: '숲 입구', plazaGate: '광장 입구', plazaExit: '광장 출구',
     interactHint: '타일을 선택하면 행동 방법이 표시됩니다.', moveHint: '타일을 누르면 이동합니다.', enterHint: 'E 또는 타일 터치로 입장합니다.',
     mineHintAction: 'Space/Z 또는 타일 터치로 채굴합니다.', noActionHint: '가능한 행동이 없습니다.',
+    oreHp: (hp, maxHp) => `광석 체력 ${hp}/${maxHp}`,
     itemsTab: '아이템', equipmentTab: '장비', pickaxeSlot: '곡괭이 슬롯', dragPickaxeHint: '곡괭이 카드를 드래그해서 슬롯에 장착하세요.',
     equipped: '장착 중', equipEmpty: '장착된 곡괭이가 없습니다.', equippedPickaxe: pick => `곡괭이 장착: ${pick}`, noPickaxeEquipped: '장착한 곡괭이가 없다.',
     emptyInventory: '-- 비어 있음 --', exchange: '거래소', exchangeEmpty: '교환할 물건이 없습니다.', sellOne: '1개 판매', sellAll: '전부 판매',
@@ -597,11 +603,11 @@ function generatePlazaMap() {
     }
   }
 
-  for (let x = 4; x <= 20; x++) {
-    setCell(map, x, 12, { type: 'floor' });
+  for (let x = 4; x <= PLAZA_POINTS.forestGate.x; x++) {
+    setCell(map, x, MAP_MID_Y, { type: 'floor' });
   }
-  for (let y = 8; y <= 16; y++) {
-    setCell(map, 12, y, { type: 'floor' });
+  for (let y = MAP_MID_Y - 4; y <= MAP_MID_Y + 4; y++) {
+    setCell(map, PLAZA_POINTS.spawn.x, y, { type: 'floor' });
   }
 
   setCell(map, PLAZA_POINTS.shop.x, PLAZA_POINTS.shop.y, { type: 'shop' });
@@ -896,21 +902,36 @@ function areaLabel() {
   return `B${G.depth}F`;
 }
 
+function getViewportBounds() {
+  const half = Math.floor(VIEW_SIZE / 2);
+  const minX = Math.max(0, Math.min(G.px - half, MAP_W - VIEW_SIZE));
+  const minY = Math.max(0, Math.min(G.py - half, MAP_H - VIEW_SIZE));
+  return {
+    startX: minX,
+    startY: minY,
+    endX: Math.min(MAP_W - 1, minX + VIEW_SIZE - 1),
+    endY: Math.min(MAP_H - 1, minY + VIEW_SIZE - 1),
+  };
+}
+
 function render() {
   const canvas = UI.mapCanvas();
-  canvas.style.setProperty('--map-size', MAP_SIZE);
+  const view = getViewportBounds();
+  canvas.style.setProperty('--map-size', VIEW_SIZE);
   canvas.className = `area-${G.area || 'mine'}`;
   let html = '';
-  for (let y = 0; y < MAP_H; y++) {
-    for (let x = 0; x < MAP_W; x++) {
+  for (let y = view.startY; y <= view.endY; y++) {
+    for (let x = view.startX; x <= view.endX; x++) {
       const isPlayer = (x === G.px && y === G.py);
       const selected = G.selected && G.selected.x === x && G.selected.y === y;
       const action = getTileAction(x, y);
-      const glyph = cellGlyph(G.map[y][x], isPlayer);
-      const underGlyph = isPlayer ? cellGlyph(G.map[y][x], false) : null;
+      const cell = G.map[y][x];
+      const glyph = cellGlyph(cell, isPlayer);
+      const underGlyph = isPlayer ? cellGlyph(cell, false) : null;
+      const oreHp = cell.type === 'ore' ? `<span class="tile-ore-hp">${Math.ceil(cell.hp ?? cell.maxHp ?? ORE_BY_ID[cell.ore].hardness)}</span>` : '';
       const classes = [
         'tile',
-        `tile-${G.map[y][x].type}`,
+        `tile-${cell.type}`,
         isPlayer ? 'tile-player' : '',
         selected ? 'selected' : '',
         action && action !== 'SELECT' && !isPlayer ? 'actionable' : '',
@@ -921,8 +942,8 @@ function render() {
       const underlay = underGlyph
         ? `<span class="terrain-underlay" style="color:${underGlyph.fg};font-weight:${underGlyph.weight}">${underGlyph.ch}</span>`
         : '';
-      html += `<button type="button" class="${classes}" data-x="${x}" data-y="${y}" aria-label="${tileLabel(G.map[y][x], isPlayer, x, y)}">
-        ${underlay}<span class="tile-glyph" style="color:${glyph.fg};font-weight:${glyph.weight}">${glyph.ch}</span>${corners}
+      html += `<button type="button" class="${classes}" data-x="${x}" data-y="${y}" aria-label="${tileLabel(cell, isPlayer, x, y)}">
+        ${underlay}<span class="tile-glyph" style="color:${glyph.fg};font-weight:${glyph.weight}">${glyph.ch}</span>${oreHp}${corners}
       </button>`;
     }
   }
@@ -1102,7 +1123,8 @@ function updateSelectionInfo() {
   const isPlayer = x === G.px && y === G.py;
   const target = tileLabel(cell, isPlayer, x, y).toUpperCase();
   const action = G.autoMove?.target ? 'MOVING' : getTileAction(x, y);
-  info.textContent = `${target} / ${actionHint(action)}`;
+  const oreHpText = cell.type === 'ore' ? ` / ${t('oreHp', Math.ceil(cell.hp ?? cell.maxHp ?? ORE_BY_ID[cell.ore].hardness), cell.maxHp ?? ORE_BY_ID[cell.ore].hardness)}` : '';
+  info.textContent = `${target}${oreHpText} / ${actionHint(action)}`;
 }
 
 
