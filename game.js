@@ -233,6 +233,23 @@ function setLanguage(language) {
 applyLayoutMode(SETTINGS.layoutMode);
 applyLanguage();
 
+
+const UI = {
+  mapCanvas: () => document.getElementById('map-canvas'),
+  hpVal: () => document.getElementById('hp-val'),
+  stamVal: () => document.getElementById('stam-val'),
+  xpVal: () => document.getElementById('xp-val'),
+  lvVal: () => document.getElementById('lv-val'),
+  pickVal: () => document.getElementById('pick-val'),
+  depthVal: () => document.getElementById('depth-val'),
+  goldVal: () => document.getElementById('gold-val'),
+  statPointsVal: () => document.getElementById('stat-points-val'),
+  mapTitle: () => document.getElementById('map-title'),
+  hpBar: () => document.getElementById('hp-bar'),
+  stamBar: () => document.getElementById('stam-bar'),
+  xpBar: () => document.getElementById('xp-bar'),
+};
+
 // ---- MAP GENERATION ----
 function blankMap(type) {
   return Array.from({ length: MAP_H }, () =>
@@ -858,7 +875,7 @@ function areaLabel() {
 }
 
 function render() {
-  const canvas = document.getElementById('map-canvas');
+  const canvas = UI.mapCanvas();
   canvas.style.setProperty('--map-size', MAP_SIZE);
   canvas.className = `area-${G.area || 'mine'}`;
   let html = '';
@@ -890,23 +907,23 @@ function render() {
   canvas.innerHTML = html;
   updateSelectionInfo();
 
-  document.getElementById('hp-val').textContent = `${G.hp} / ${G.hpMax}`;
-  document.getElementById('stam-val').textContent = `${G.stam} / ${G.stamMax}`;
-  document.getElementById('xp-val').textContent = `${G.xp} / ${G.xpNext}`;
-  document.getElementById('lv-val').textContent = G.level;
-  document.getElementById('pick-val').textContent = `DMG ${G.attackDamage.toFixed(1)} / ASPD ${G.attackSpeed.toFixed(1)} / GOLD x${G.goldMult.toFixed(1)}`;
-  document.getElementById('depth-val').textContent = areaLabel();
-  document.getElementById('gold-val').textContent = G.gold || 0;
-  const sp = document.getElementById('stat-points-val');
+  UI.hpVal().textContent = `${G.hp} / ${G.hpMax}`;
+  UI.stamVal().textContent = `${G.stam} / ${G.stamMax}`;
+  UI.xpVal().textContent = `${G.xp} / ${G.xpNext}`;
+  UI.lvVal().textContent = G.level;
+  UI.pickVal().textContent = `DMG ${G.attackDamage.toFixed(1)} / ASPD ${G.attackSpeed.toFixed(1)} / GOLD x${G.goldMult.toFixed(1)}`;
+  UI.depthVal().textContent = areaLabel();
+  UI.goldVal().textContent = G.gold || 0;
+  const sp = UI.statPointsVal();
   if (sp) sp.textContent = G.statPoints || 0;
-  document.getElementById('map-title').textContent =
+  UI.mapTitle().textContent =
     G.area === 'mine' ? t('dungeonMap') :
       G.area === 'shop' ? t('shopMap') :
         G.area === 'plaza' ? t('plazaMap') : t('forestMap');
 
-  document.getElementById('hp-bar').style.width = (G.hp / G.hpMax * 100) + '%';
-  document.getElementById('stam-bar').style.width = (G.stam / G.stamMax * 100) + '%';
-  document.getElementById('xp-bar').style.width = (G.xp / G.xpNext * 100) + '%';
+  UI.hpBar().style.width = (G.hp / G.hpMax * 100) + '%';
+  UI.stamBar().style.width = (G.stam / G.stamMax * 100) + '%';
+  UI.xpBar().style.width = (G.xp / G.xpNext * 100) + '%';
 
 }
 
@@ -939,8 +956,13 @@ function tryReturn() {
   stopAutoMove();
   if (G.gameOver) return;
 
-  if (G.area === 'mine' || G.area === 'forest' || G.area === 'shop') {
+  if (G.area === 'mine' || G.area === 'forest') {
     enterPlaza('forest');
+    return;
+  }
+
+  if (G.area === 'shop') {
+    enterPlaza('shop');
     return;
   }
 
@@ -1123,7 +1145,7 @@ function allocateStat(stat) {
 }
 
 function saveGame() {
-  if (!G.map || G.gameOver) return;
+  if (!G.map || G.gameOver) return false;
   try {
     const state = {
       area: G.area,
@@ -1149,14 +1171,19 @@ function saveGame() {
       turn: G.turn,
     };
     localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+    return true;
   } catch {
     // Autosave is best-effort; gameplay should continue if storage is blocked.
   }
+  return false;
 }
 
 function manualSave() {
-  saveGame();
-  log(t('gameSaved'), 'ok');
+  if (saveGame()) {
+    log(t('gameSaved'), 'ok');
+  } else {
+    log(t('noSave'), 'warn');
+  }
 }
 
 function loadGame() {
