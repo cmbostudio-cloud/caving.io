@@ -3,7 +3,7 @@
 // ============================================================
 
 const MAP_SIZE = 30;
-const VIEW_SIZE = 9;
+const VIEW_SIZE = 11;
 const MAP_W = MAP_SIZE;
 const MAP_H = MAP_SIZE;
 const MAP_LAST_X = MAP_W - 1;
