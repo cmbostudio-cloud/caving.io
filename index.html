@@ -67,69 +67,6 @@
     </div>
   </div>
 
-  <!-- Inventory Overlay (game.js의 toggleInventory()가 참조) -->
-  <div id="inventory-overlay" hidden>
-    <div id="inventory-window">
-      <div class="inventory-head">
-        <div class="panel-title" data-i18n="inventory">INVENTORY</div>
-        <div class="inventory-head-actions">
-          <div class="inventory-tabs" role="tablist" aria-label="Inventory tabs">
-            <button id="inventory-tab-items" type="button" role="tab" class="inventory-tab active" data-i18n="itemsTab"
-              onclick="setInventoryTab('items')">ITEMS</button>
-            
-          </div>
-          <button id="inventory-close" type="button" onclick="toggleInventory(false)">✕</button>
-        </div>
-      </div>
-      <div class="inventory-body">
-        <div class="inventory-profile">
-          <div class="player-card">
-            
-            <div class="player-avatar">
-              <!-- 7x7 pixel avatar grid -->
-              <span></span><span></span><span class="on"></span><span class="on"></span><span
-                class="on"></span><span></span><span></span>
-              <span></span><span class="on"></span><span></span><span></span><span></span><span
-                class="on"></span><span></span>
-              <span class="on"></span><span></span><span class="on"></span><span class="on"></span><span
-                class="on"></span><span></span><span class="on"></span>
-              <span class="on"></span><span></span><span class="on"></span><span></span><span
-                class="on"></span><span></span><span class="on"></span>
-              <span class="on"></span><span></span><span class="on"></span><span class="on"></span><span
-                class="on"></span><span></span><span class="on"></span>
-              <span></span><span class="on"></span><span></span><span></span><span></span><span
-                class="on"></span><span></span>
-              <span></span><span></span><span class="on"></span><span class="on"></span><span
-                class="on"></span><span></span><span></span>
-            </div>
-          </div>
-          <div class="inventory-stats">
-            <div id="inventory-stats-list"></div>
-          </div>
-        </div>
-        <div class="inventory-materials">
-          <div id="inventory-card-grid"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Exchange Overlay (game.js의 toggleExchange()가 참조) -->
-  <div id="exchange-overlay" hidden>
-    <div id="exchange-window">
-      <div class="modal-head" style="padding:10px;border-bottom:1px solid var(--border)">
-        <div class="panel-title" data-i18n="exchange">EXCHANGE</div>
-        <button id="exchange-close" type="button" onclick="toggleExchange(false)">✕</button>
-      </div>
-      <div class="exchange-summary">
-        <span data-i18n="gold">GOLD</span>
-        <strong id="exchange-gold-val">0</strong>
-      </div>
-      <div id="exchange-list"></div>
-    </div>
-  </div>
-
-
   <div id="crafting-overlay" hidden>
     <div id="crafting-window">
       <div class="modal-head crafting-head">
@@ -196,8 +133,6 @@
         <span class="stat-val" id="gold-val">0</span>
       </div>
 
-      <div class="panel-title" style="margin-top:10px" data-i18n="inventory">INVENTORY</div>
-      <div id="inv-list"></div>
     </div>
 
     <div class="panel" id="action-panel">
@@ -205,7 +140,7 @@
       <div id="selection-info">NO TILE SELECTED</div>
       <div class="action-grid">
         <button class="action-btn" type="button" data-i18n="return" onclick="tryReturn()">RETURN (R)</button>
-        <button class="action-btn" type="button" data-i18n="inventoryButton" onclick="toggleInventory()">INVENTORY (I)</button>
+        
       </div>
     </div>
 

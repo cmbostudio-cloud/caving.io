@@ -30,7 +30,6 @@ academy: { x: 5, y: 19 },
 const SHOP_POINTS = {
   spawn: { x: 12, y: 14 },
   exit: { x: 12, y: 16 },
-  exchange: { x: 12, y: 11 },
 };
 
 const ORES = [
@@ -634,7 +633,6 @@ function generateShopMap() {
   }
 
   setCell(map, SHOP_POINTS.spawn.x, SHOP_POINTS.spawn.y, { type: 'floor' });
-  setCell(map, SHOP_POINTS.exchange.x, SHOP_POINTS.exchange.y, { type: 'exchange' });
   setCell(map, SHOP_POINTS.exit.x, SHOP_POINTS.exit.y, { type: 'shopExit' });
   return map;
 }
@@ -743,12 +741,10 @@ function initGame() {
     stam: 100, stamMax: 100,
     xp: 0, xpNext: 100,
     level: 1,
-    inventoryTab: 'items',
     miningSpeed: 1,
     goldMult: 1,
     depthAccess: 1,
     gold: 0,
-    inventory: {},
     map: null,
     selected: null,
     autoMove: {
@@ -763,8 +759,6 @@ function initGame() {
     plazaMap: null,
     forestMap: null,
   };
-  ORES.forEach(o => { G.inventory[o.id] = 0; });
-  MATERIALS.forEach(m => { G.inventory[m.id] = 0; });
   enterPlaza('start');
   saveGame();
 }
@@ -831,8 +825,6 @@ function cellGlyph(cell, isPlayer) {
       return { ch: '<', fg: '#ff9800', weight: 'bold' };
     case 'shop':
       return { ch: '$', fg: '#ffd700', weight: 'bold' };
-    case 'exchange':
-      return { ch: 'G', fg: '#ffd700', weight: 'bold' };
     case 'shopExit':
       return { ch: '<', fg: '#ff9800', weight: 'bold' };
     case 'academy':
@@ -858,7 +850,6 @@ function tileLabel(cell, isPlayer, x, y) {
   if (cell.type === 'forestGate') return `${t('forestGate')} ${x}, ${y}`;
   if (cell.type === 'plazaExit') return `${t('plazaExit')} ${x}, ${y}`;
   if (cell.type === 'shop') return `${t('shop')} ${x}, ${y}`;
-  if (cell.type === 'exchange') return `${t('exchange')} ${x}, ${y}`;
   if (cell.type === 'shopExit') return `${t('shopExit')} ${x}, ${y}`;
   if (cell.type === 'academy') return `${t('academy')} ${x}, ${y}`;
   if (cell.type === 'ore') {
@@ -869,11 +860,11 @@ function tileLabel(cell, isPlayer, x, y) {
 }
 
 function isWalkableCell(cell) {
-  return ['floor', 'stairs', 'grass', 'flower', 'mineEntrance', 'shop', 'shopExit', 'exchange', 'forestGate', 'plazaExit', 'academy'].includes(cell.type);
+  return ['floor', 'stairs', 'grass', 'flower', 'mineEntrance', 'shop', 'shopExit', 'forestGate', 'plazaExit', 'academy'].includes(cell.type);
 }
 
 function isPortalCell(cell) {
-  return ['stairs', 'mineEntrance', 'shop', 'shopExit', 'exchange', 'forestGate', 'plazaExit', 'academy'].includes(cell.type);
+  return ['stairs', 'mineEntrance', 'shop', 'shopExit', 'forestGate', 'plazaExit', 'academy'].includes(cell.type);
 }
 
 function areaLabel() {
@@ -932,21 +923,6 @@ function render() {
   document.getElementById('stam-bar').style.width = (G.stam / G.stamMax * 100) + '%';
   document.getElementById('xp-bar').style.width = (G.xp / G.xpNext * 100) + '%';
 
-  const entries = inventoryEntries().filter(item => item.count > 0);
-  let invHtml = entries.slice(0, 3).map(item => `<div class="ore-row">
-    <span class="ore-sym" style="color:${item.fg}">${item.ch}</span>
-    <span class="ore-name">${item.name}</span>
-    <span class="ore-cnt">${item.count}</span>
-  </div>`).join('');
-  if (entries.length > 3) {
-    invHtml += `<div class="inventory-more">${t('moreInventory', entries.length - 3)}</div>`;
-  }
-  if (!entries.length) invHtml = `<div style="color:#333;font-size:11px;padding:4px 0">${t('emptyInventory')}</div>`;
-  document.getElementById('inv-list').innerHTML = invHtml;
-  const invOverlay = document.getElementById('inventory-overlay');
-  if (invOverlay && !invOverlay.hasAttribute('hidden')) renderInventoryOverlay();
-  const exOverlay = document.getElementById('exchange-overlay');
-  if (exOverlay && !exOverlay.hasAttribute('hidden')) renderExchangeWindow();
 }
 
 function tryStairs() {
@@ -965,8 +941,6 @@ function tryStairs() {
     enterPlaza('forest');
   } else if (cell.type === 'shop') {
     enterShop();
-  } else if (cell.type === 'exchange') {
-    toggleExchange(true);
   } else if (cell.type === 'shopExit') {
     enterPlaza('shop');
   } else if (cell.type === 'academy') {
@@ -1013,8 +987,9 @@ function mineCell(tx, ty) {
     G.stam = Math.max(0, G.stam - 3);
     G.map[ty][tx] = { type: 'grass' };
     const amount = 1;
-    G.inventory.wood_plank = (G.inventory.wood_plank || 0) + amount;
-    log(t('treeMined', amount), 'ok');
+    const goldGain = Math.max(1, Math.round((SELL_VALUES.wood_plank || 1) * amount * G.goldMult));
+    G.gold += goldGain;
+    log(`${t('treeMined', amount)} (+${goldGain}G)`, 'ok');
     tick(2);
     render();
     return;
@@ -1100,32 +1075,6 @@ function updateSelectionInfo() {
   info.textContent = `${target} / ${actionHint(action)}`;
 }
 
-function inventoryEntries() {
-  return [
-    ...MATERIALS.map(item => ({
-      id: item.id,
-      ch: item.ch,
-      fg: item.fg,
-      name: materialName(item),
-      count: G.inventory[item.id] || 0,
-    })),
-    ...ORES.map(item => ({
-      id: item.id,
-      ch: item.ch,
-      fg: item.fg,
-      name: oreName(item),
-      count: G.inventory[item.id] || 0,
-    })),
-  ];
-}
-
-
-
-
-function setInventoryTab(tab) {
-  G.inventoryTab = tab === 'equipment' ? 'equipment' : 'items';
-  renderInventoryOverlay();
-}
 
 
 
@@ -1135,54 +1084,11 @@ function setInventoryTab(tab) {
 
 
 
-function renderInventoryOverlay() {
-  const overlay = document.getElementById('inventory-overlay');
-  if (!overlay || !G.map) return;
 
-  const stats = document.getElementById('inventory-stats-list');
-  if (stats) {
-    const rows = [
-      [t('hp'), `${G.hp} / ${G.hpMax}`],
-      [t('stamina'), `${G.stam} / ${G.stamMax}`],
-      [t('exp'), `${G.xp} / ${G.xpNext}`],
-      [t('level'), G.level],
-      [t('power'), `SPD x${G.miningSpeed.toFixed(1)} / GOLD x${G.goldMult.toFixed(1)} / B${G.depthAccess}`],
-      [t('area'), areaLabel()],
-      [t('gold'), G.gold || 0],
-    ];
-    stats.innerHTML = rows.map(([label, value]) => `
-      <div class="inventory-stat-row">
-        <span>${label}</span>
-        <span>${value}</span>
-      </div>
-    `).join('');
-  }
 
-  const grid = document.getElementById('inventory-card-grid');
-  document.getElementById('inventory-tab-items')?.classList.add('active');
-  if (grid) {
-    const itemSlots = Array.from({ length: 36 }, (_, idx) => inventoryEntries().filter(item => item.count > 0)[idx] || null);
-    grid.innerHTML = itemSlots.map(item => `
-      <div class="material-card">
-        <div class="material-symbol" style="color:${item ? item.fg : '#2a2a2a'}">${item ? item.ch : ''}</div>
-        <div class="material-count">${item ? item.count : ''}</div>
-      </div>
-    `).join('');
-  }
-}
 
-function toggleInventory(forceOpen) {
-  const overlay = document.getElementById('inventory-overlay');
-  if (!overlay) return;
-  const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : overlay.hasAttribute('hidden');
-  if (shouldOpen) {
-    toggleSettings(false);
-    toggleExchange(false);
-    toggleCrafting(false);
-    renderInventoryOverlay();
-  }
-  overlay.toggleAttribute('hidden', !shouldOpen);
-}
+
+
 
 function toggleSettings(forceOpen) {
   const overlay = document.getElementById('settings-overlay');
@@ -1190,62 +1096,15 @@ function toggleSettings(forceOpen) {
   if (!overlay) return;
   const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : overlay.hasAttribute('hidden');
   if (shouldOpen) {
-    toggleInventory(false);
-    toggleExchange(false);
     toggleCrafting(false);
   }
   overlay.toggleAttribute('hidden', !shouldOpen);
   if (button) button.setAttribute('aria-expanded', String(shouldOpen));
 }
 
-function exchangeEntries() {
-  return inventoryEntries()
-    .map(item => ({ ...item, value: SELL_VALUES[item.id] || 0 }))
-    .filter(item => item.count > 0 && item.value > 0);
-}
 
-function renderExchangeWindow() {
-  const overlay = document.getElementById('exchange-overlay');
-  if (!overlay || !G.map) return;
-  const goldVal = document.getElementById('exchange-gold-val');
-  if (goldVal) goldVal.textContent = G.gold || 0;
-  const list = document.getElementById('exchange-list');
-  if (!list) return;
-  const entries = exchangeEntries();
-  list.innerHTML = entries.length
-    ? entries.map(item => `
-      <div class="exchange-row">
-        <span class="ore-sym" style="color:${item.fg}">${item.ch}</span>
-        <span class="exchange-name">${item.name} x${item.count}</span>
-        <span class="exchange-value">${item.value}G</span>
-        <button type="button" onclick="sellItem('${item.id}', 1)">${t('sellOne')}</button>
-        <button type="button" onclick="sellItem('${item.id}', ${item.count})">${t('sellAll')}</button>
-      </div>
-    `).join('')
-    : `<div style="color:#333;font-size:11px;padding:4px 0">${t('exchangeEmpty')}</div>`;
-}
 
-function toggleExchange(forceOpen) {
-  const overlay = document.getElementById('exchange-overlay');
-  if (!overlay) return;
-  const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : overlay.hasAttribute('hidden');
-  if (shouldOpen) {
-    toggleInventory(false);
-    toggleSettings(false);
-    renderExchangeWindow();
-  }
-  overlay.toggleAttribute('hidden', !shouldOpen);
-}
 
-function sellItem(id, amount) {
-  const current = G.inventory[id] || 0;
-  const qty = Math.max(0, Math.min(current, amount));
-  const value = SELL_VALUES[id] || 0;
-  if (!qty || !value) return;
-  G.inventory[id] = current - qty;
-  G.gold = (G.gold || 0) + qty * value;
-  render();
-}
 
 
 function toggleCrafting(forceOpen) {
@@ -1280,12 +1139,10 @@ function saveGame() {
       xp: G.xp,
       xpNext: G.xpNext,
       level: G.level,
-      inventoryTab: 'items',
-      miningSpeed: G.miningSpeed,
+        miningSpeed: G.miningSpeed,
       goldMult: G.goldMult,
       depthAccess: G.depthAccess,
       gold: G.gold || 0,
-      inventory: G.inventory,
       map: G.map,
       plazaMap: G.plazaMap,
       forestMap: G.forestMap,
@@ -1319,12 +1176,10 @@ function loadGame() {
       xp: saved.xp ?? 0,
       xpNext: saved.xpNext ?? 100,
       level: saved.level ?? 1,
-      inventoryTab: 'items',
-      miningSpeed: Number(saved.miningSpeed) || 1,
+        miningSpeed: Number(saved.miningSpeed) || 1,
       goldMult: Number(saved.goldMult) || 1,
       depthAccess: Number(saved.depthAccess) || 1,
       gold: saved.gold ?? 0,
-      inventory: saved.inventory || {},
       map: saved.map,
       selected: saved.selected || null,
       autoMove: { path: [], timer: null, target: null, mineTarget: null, id: 0 },
@@ -1335,8 +1190,6 @@ function loadGame() {
     };
     migrateWorkbenchInMap(G.plazaMap);
     migrateWorkbenchInMap(G.map);
-    ORES.forEach(o => { if (G.inventory[o.id] == null) G.inventory[o.id] = 0; });
-    MATERIALS.forEach(m => { if (G.inventory[m.id] == null) G.inventory[m.id] = 0; });
     render();
     return true;
   } catch {
@@ -1428,9 +1281,7 @@ document.getElementById('map-canvas').addEventListener('pointerdown', e => {
 document.addEventListener('keydown', e => {
   if (G.gameOver) return;
   if (e.key === 'Escape') {
-    toggleInventory(false);
     toggleSettings(false);
-    toggleExchange(false);
     toggleCrafting(false);
     return;
   }
@@ -1441,8 +1292,6 @@ document.addEventListener('keydown', e => {
     tryMine();
   } else if (e.key === 'r' || e.key === 'R') {
     tryReturn();
-  } else if (e.key === 'i' || e.key === 'I') {
-    toggleInventory();
   } else if (e.key === 'k' || e.key === 'K') {
     manualSave();
   } else if (e.key === 'l' || e.key === 'L') {
