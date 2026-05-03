@@ -81,9 +81,9 @@ const ORE_NAMES = {
 
 const I18N = {
   en: {
-    loading: 'LOADING', settings: 'SETTINGS', layout: 'LAYOUT', classic: 'CLASSIC', square: 'SQUARE', saveLoad: 'SAVE/LOAD',
+    loading: 'LOADING', settings: 'SETTINGS', settingsShort: 'SET', install: 'INSTALL', layout: 'LAYOUT', classic: 'CLASSIC', square: 'SQUARE', saveLoad: 'SAVE/LOAD',
     language: 'LANGUAGE', status: 'STATUS', hp: 'HP', stamina: 'STAMINA', exp: 'EXP', level: 'LEVEL',
-    power: 'POWER', area: 'AREA', gold: 'GOLD', inventory: 'INVENTORY', inventoryButton: 'INVENTORY (I)', saveButton: 'SAVE (K)', loadButton: 'LOAD (L)', materials: 'MATERIALS', action: 'ACTION',
+    power: 'POWER', area: 'AREA', gold: 'GOLD', statPoints: 'STAT POINTS', points: 'POINTS', statDamage: 'Damage Up', statAttackSpeed: 'Attack Speed Up', statGoldMult: 'Gold Rate Up', upgradeDamage: 'Damage Upgrade (100G)', upgradeGoldMult: 'Gold Gain Upgrade (180G)', upgradeAttackSpeed: 'Attack Speed Upgrade (150G)', inventory: 'INVENTORY', inventoryButton: 'INVENTORY (I)', saveButton: 'SAVE (K)', loadButton: 'LOAD (L)', materials: 'MATERIALS', action: 'ACTION',
     use: 'USE', mine: 'MINE', return: 'RETURN (R)', rest: 'REST', log: 'LOG',
     noSelection: 'NO TILE SELECTED', moving: 'MOVING', select: 'SELECT', enter: 'ENTER', move: 'MOVE',
     player: 'Player', wall: 'Wall', floor: 'Floor', stairs: 'Stairs', grass: 'Grass', tree: 'Tree',
@@ -118,9 +118,9 @@ const I18N = {
     gameSaved: 'Game saved.', gameLoaded: 'Save loaded.', noSave: 'No save data found.'
   },
   ko: {
-    loading: '로딩 중', settings: '설정', layout: '배치', classic: '기본', square: '정사각', saveLoad: '저장/불러오기',
+    loading: '로딩 중', settings: '설정', settingsShort: '설정', install: '설치', layout: '배치', classic: '기본', square: '정사각', saveLoad: '저장/불러오기',
     language: '언어', status: '상태', hp: '체력', stamina: '스태미나', exp: '경험치', level: '레벨',
-    power: '능력', area: '지역', gold: '골드', inventory: '인벤토리', inventoryButton: '인벤토리 (I)', saveButton: '저장 (K)', loadButton: '불러오기 (L)', materials: '재료', action: '행동',
+    power: '능력', area: '지역', gold: '골드', statPoints: '스탯 포인트', points: '포인트', statDamage: '데미지 증가', statAttackSpeed: '공격 속도 증가', statGoldMult: '획득 골드 비율 증가', upgradeDamage: '데미지 강화 (100G)', upgradeGoldMult: '획득 골드 강화 (180G)', upgradeAttackSpeed: '공격 속도 강화 (150G)', inventory: '인벤토리', inventoryButton: '인벤토리 (I)', saveButton: '저장 (K)', loadButton: '불러오기 (L)', materials: '재료', action: '행동',
     use: '사용', mine: '채굴', return: '귀환 (R)', rest: '휴식', log: '기록',
     noSelection: '선택한 타일 없음', moving: '이동 중', select: '선택', enter: '입장', move: '이동',
     player: '플레이어', wall: '벽', floor: '바닥', stairs: '계단', grass: '풀', tree: '나무',
@@ -215,7 +215,17 @@ function applyLanguage() {
   document.querySelectorAll('[data-lang-option]').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.langOption === lang());
   });
+  const upgradeLabelKey = {
+    damage: 'upgradeDamage',
+    gold_mult: 'upgradeGoldMult',
+    attack_speed: 'upgradeAttackSpeed',
+  };
+  document.querySelectorAll('[data-upgrade]').forEach(btn => {
+    const key = upgradeLabelKey[btn.dataset.upgrade];
+    if (key) btn.textContent = t(key);
+  });
   if (G.map) render();
+  else updateSelectionInfo();
 }
 
 function setLayoutMode(mode) {
@@ -230,8 +240,37 @@ function setLanguage(language) {
   applyLanguage();
 }
 
+
+function syncViewportHeight() {
+  const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  document.documentElement.style.setProperty('--app-vh', `${vh}px`);
+}
+
+window.addEventListener('resize', syncViewportHeight, { passive: true });
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', syncViewportHeight, { passive: true });
+}
+syncViewportHeight();
+
 applyLayoutMode(SETTINGS.layoutMode);
 applyLanguage();
+
+
+const UI = {
+  mapCanvas: () => document.getElementById('map-canvas'),
+  hpVal: () => document.getElementById('hp-val'),
+  stamVal: () => document.getElementById('stam-val'),
+  xpVal: () => document.getElementById('xp-val'),
+  lvVal: () => document.getElementById('lv-val'),
+  pickVal: () => document.getElementById('pick-val'),
+  depthVal: () => document.getElementById('depth-val'),
+  goldVal: () => document.getElementById('gold-val'),
+  statPointsVal: () => document.getElementById('stat-points-val'),
+  mapTitle: () => document.getElementById('map-title'),
+  hpBar: () => document.getElementById('hp-bar'),
+  stamBar: () => document.getElementById('stam-bar'),
+  xpBar: () => document.getElementById('xp-bar'),
+};
 
 // ---- MAP GENERATION ----
 function blankMap(type) {
@@ -858,7 +897,7 @@ function areaLabel() {
 }
 
 function render() {
-  const canvas = document.getElementById('map-canvas');
+  const canvas = UI.mapCanvas();
   canvas.style.setProperty('--map-size', MAP_SIZE);
   canvas.className = `area-${G.area || 'mine'}`;
   let html = '';
@@ -890,23 +929,23 @@ function render() {
   canvas.innerHTML = html;
   updateSelectionInfo();
 
-  document.getElementById('hp-val').textContent = `${G.hp} / ${G.hpMax}`;
-  document.getElementById('stam-val').textContent = `${G.stam} / ${G.stamMax}`;
-  document.getElementById('xp-val').textContent = `${G.xp} / ${G.xpNext}`;
-  document.getElementById('lv-val').textContent = G.level;
-  document.getElementById('pick-val').textContent = `DMG ${G.attackDamage.toFixed(1)} / ASPD ${G.attackSpeed.toFixed(1)} / GOLD x${G.goldMult.toFixed(1)}`;
-  document.getElementById('depth-val').textContent = areaLabel();
-  document.getElementById('gold-val').textContent = G.gold || 0;
-  const sp = document.getElementById('stat-points-val');
+  UI.hpVal().textContent = `${G.hp} / ${G.hpMax}`;
+  UI.stamVal().textContent = `${G.stam} / ${G.stamMax}`;
+  UI.xpVal().textContent = `${G.xp} / ${G.xpNext}`;
+  UI.lvVal().textContent = G.level;
+  UI.pickVal().textContent = `DMG ${G.attackDamage.toFixed(1)} / ASPD ${G.attackSpeed.toFixed(1)} / GOLD x${G.goldMult.toFixed(1)}`;
+  UI.depthVal().textContent = areaLabel();
+  UI.goldVal().textContent = G.gold || 0;
+  const sp = UI.statPointsVal();
   if (sp) sp.textContent = G.statPoints || 0;
-  document.getElementById('map-title').textContent =
+  UI.mapTitle().textContent =
     G.area === 'mine' ? t('dungeonMap') :
       G.area === 'shop' ? t('shopMap') :
         G.area === 'plaza' ? t('plazaMap') : t('forestMap');
 
-  document.getElementById('hp-bar').style.width = (G.hp / G.hpMax * 100) + '%';
-  document.getElementById('stam-bar').style.width = (G.stam / G.stamMax * 100) + '%';
-  document.getElementById('xp-bar').style.width = (G.xp / G.xpNext * 100) + '%';
+  UI.hpBar().style.width = (G.hp / G.hpMax * 100) + '%';
+  UI.stamBar().style.width = (G.stam / G.stamMax * 100) + '%';
+  UI.xpBar().style.width = (G.xp / G.xpNext * 100) + '%';
 
 }
 
@@ -939,8 +978,13 @@ function tryReturn() {
   stopAutoMove();
   if (G.gameOver) return;
 
-  if (G.area === 'mine' || G.area === 'forest' || G.area === 'shop') {
+  if (G.area === 'mine' || G.area === 'forest') {
     enterPlaza('forest');
+    return;
+  }
+
+  if (G.area === 'shop') {
+    enterPlaza('shop');
     return;
   }
 
@@ -1123,7 +1167,7 @@ function allocateStat(stat) {
 }
 
 function saveGame() {
-  if (!G.map || G.gameOver) return;
+  if (!G.map || G.gameOver) return false;
   try {
     const state = {
       area: G.area,
@@ -1149,14 +1193,19 @@ function saveGame() {
       turn: G.turn,
     };
     localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+    return true;
   } catch {
     // Autosave is best-effort; gameplay should continue if storage is blocked.
   }
+  return false;
 }
 
 function manualSave() {
-  saveGame();
-  log(t('gameSaved'), 'ok');
+  if (saveGame()) {
+    log(t('gameSaved'), 'ok');
+  } else {
+    log(t('noSave'), 'warn');
+  }
 }
 
 function loadGame() {
