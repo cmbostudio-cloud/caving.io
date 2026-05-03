@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323:wght@400&display=swap');
 
 :root {
-  --map-size: 25;
+  --map-size: 9;
   --bg: #0a0a0a;
   --bg2: #111111;
   --border: #2a2a2a;
@@ -305,7 +305,7 @@ body[data-layout="square"] #map-canvas {
   aspect-ratio: 1 / 1;
   align-self: center;
   font-family: 'Share Tech Mono', monospace;
-  font-size: clamp(10px, 1.2vw, 16px);
+  font-size: clamp(13px, 1.8vw, 22px);
   line-height: 1;
   overflow: hidden;
   letter-spacing: 0;
@@ -405,6 +405,18 @@ body[data-layout="square"] #map-canvas {
 #map-canvas.area-mine .tile-wall { background: rgba(18,18,18,0.5); }
 #map-canvas.area-plaza .tile-floor { background: rgba(58,54,40,0.15); }
 #map-canvas.area-plaza .tile-wall { background: rgba(22,20,16,0.45); }
+
+
+.tile-ore-hp {
+  position: absolute;
+  right: 2px;
+  bottom: 1px;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--red);
+  text-shadow: 0 0 3px rgba(0,0,0,0.9);
+  pointer-events: none;
+}
 
 .tile.selected .corner {
   position: absolute;
@@ -1194,7 +1206,7 @@ body[data-layout="square"] #map-canvas {
 
   #install-btn,
 #settings-btn {
-    font-size: 9px;
+    font-size: 11px;
     padding: 5px 7px;
   }
 
@@ -1243,7 +1255,7 @@ body[data-layout="square"] #map-canvas {
   #map-canvas,
   body[data-layout="square"] #map-canvas {
     width: 100%;
-    font-size: clamp(8px, 2.5vw, 13px);
+    font-size: clamp(11px, 3.2vw, 18px);
   }
 
   .action-grid {
