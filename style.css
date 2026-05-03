@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323:wght@400&display=swap');
 
 :root {
-  --map-size: 25;
+  --map-size: 11;
   --bg: #0a0a0a;
   --bg2: #111111;
   --border: #2a2a2a;
@@ -295,6 +295,7 @@ body[data-layout="square"] #map-canvas {
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  position: relative;
 }
 
 #map-canvas {
@@ -305,13 +306,26 @@ body[data-layout="square"] #map-canvas {
   aspect-ratio: 1 / 1;
   align-self: center;
   font-family: 'Share Tech Mono', monospace;
-  font-size: clamp(10px, 1.2vw, 16px);
+  font-size: clamp(15px, 2.2vw, 26px);
   line-height: 1;
   overflow: hidden;
   letter-spacing: 0;
   touch-action: manipulation;
   border: 1px solid #161616;
   background: #080808;
+}
+
+#mini-map {
+  position: absolute;
+  top: 30px;
+  right: 10px;
+  width: 92px;
+  height: 92px;
+  border: 1px solid #3b3b3b;
+  background: rgba(0, 0, 0, 0.75);
+  image-rendering: pixelated;
+  z-index: 5;
+  pointer-events: none;
 }
 
 .tile {
@@ -406,6 +420,18 @@ body[data-layout="square"] #map-canvas {
 #map-canvas.area-plaza .tile-floor { background: rgba(58,54,40,0.15); }
 #map-canvas.area-plaza .tile-wall { background: rgba(22,20,16,0.45); }
 
+
+.tile-ore-hp {
+  position: absolute;
+  right: 2px;
+  bottom: 1px;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--red);
+  text-shadow: 0 0 3px rgba(0,0,0,0.9);
+  pointer-events: none;
+}
+
 .tile.selected .corner {
   position: absolute;
   width: 22%;
@@ -457,12 +483,12 @@ body[data-layout="square"] #map-canvas {
 
 .stat-label {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .stat-val {
   color: var(--bright);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .bar-wrap {
@@ -507,7 +533,7 @@ body[data-layout="square"] #map-canvas {
 #selection-info {
   min-height: 18px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   margin-bottom: 8px;
 }
 
@@ -522,7 +548,7 @@ body[data-layout="square"] #map-canvas {
   border: 1px solid var(--border);
   color: var(--text);
   font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 2px;
   min-height: 36px;
   padding: 8px 6px;
@@ -545,7 +571,7 @@ body[data-layout="square"] #map-canvas {
 #log-list {
   overflow-y: auto;
   flex: 1;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.6;
 }
 
@@ -596,7 +622,7 @@ body[data-layout="square"] #map-canvas {
   align-items: center;
   gap: 6px;
   padding: 2px 0;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .ore-sym {
@@ -687,7 +713,7 @@ body[data-layout="square"] #map-canvas {
   border: 1px solid #3b2c15;
   color: var(--text);
   font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 1px;
   text-align: left;
   padding: 10px 12px;
@@ -709,7 +735,7 @@ body[data-layout="square"] #map-canvas {
   padding: 10px;
   border-bottom: 1px solid var(--border);
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .exchange-summary strong {
@@ -737,12 +763,12 @@ body[data-layout="square"] #map-canvas {
 .exchange-name {
   min-width: 0;
   color: var(--text);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .exchange-value {
   color: var(--gold);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .exchange-row button {
@@ -932,7 +958,7 @@ body[data-layout="square"] #map-canvas {
   gap: 10px;
   border-bottom: 1px solid #1a1a1a;
   padding: 3px 0;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .inventory-stat-row span:first-child {
@@ -978,7 +1004,7 @@ body[data-layout="square"] #map-canvas {
 
 .material-count {
   color: var(--bright);
-  font-size: 11px;
+  font-size: 12px;
   text-align: right;
   line-height: 1;
 }
@@ -1016,7 +1042,7 @@ body[data-layout="square"] #map-canvas {
 
 .equipment-empty {
   color: #444;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .equipment-slot.is-drop-target {
@@ -1194,7 +1220,7 @@ body[data-layout="square"] #map-canvas {
 
   #install-btn,
 #settings-btn {
-    font-size: 9px;
+    font-size: 12px;
     padding: 5px 7px;
   }
 
@@ -1243,7 +1269,7 @@ body[data-layout="square"] #map-canvas {
   #map-canvas,
   body[data-layout="square"] #map-canvas {
     width: 100%;
-    font-size: clamp(8px, 2.5vw, 13px);
+    font-size: clamp(12px, 3.6vw, 20px);
   }
 
   .action-grid {
