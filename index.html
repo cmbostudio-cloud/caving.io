@@ -76,8 +76,7 @@
           <div class="inventory-tabs" role="tablist" aria-label="Inventory tabs">
             <button id="inventory-tab-items" type="button" role="tab" class="inventory-tab active" data-i18n="itemsTab"
               onclick="setInventoryTab('items')">ITEMS</button>
-            <button id="inventory-tab-equipment" type="button" role="tab" class="inventory-tab" data-i18n="equipmentTab"
-              onclick="setInventoryTab('equipment')">EQUIPMENT</button>
+            
           </div>
           <button id="inventory-close" type="button" onclick="toggleInventory(false)">✕</button>
         </div>
@@ -85,11 +84,7 @@
       <div class="inventory-body">
         <div class="inventory-profile">
           <div class="player-card">
-            <div id="pickaxe-slot" class="player-pickaxe-slot"
-              draggable="true" ondragstart="onEquippedPickaxeDragStart(event)"
-              ondragover="event.preventDefault();this.classList.add('is-drop-target')"
-              ondragleave="this.classList.remove('is-drop-target')" ondrop="onPickaxeDrop(event)">
-            </div>
+            
             <div class="player-avatar">
               <!-- 7x7 pixel avatar grid -->
               <span></span><span></span><span class="on"></span><span class="on"></span><span
@@ -138,12 +133,13 @@
   <div id="crafting-overlay" hidden>
     <div id="crafting-window">
       <div class="modal-head crafting-head">
-        <div class="panel-title" data-i18n="crafting">CRAFTING</div>
+        <div class="panel-title" data-i18n="upgrades">UPGRADES</div>
         <button class="modal-close" type="button" onclick="toggleCrafting(false)">✕</button>
       </div>
       <div class="crafting-list">
-        <button class="crafting-btn" type="button" onclick="craftPickaxe('wood_pickaxe')" data-i18n="craftWoodPickaxeReq">나무 곡괭이 제작 (재료: 나무판자 5개)</button>
-        <button class="crafting-btn" type="button" onclick="craftPickaxe('stone_pickaxe')" data-i18n="craftStonePickaxeReq">돌 곡괭이 제작 (재료: 나무 곡괭이 + 철광석 5개 + 석탄 3개)</button>
+        <button class="crafting-btn" type="button" onclick="craftPickaxe('mining_speed')">채굴 속도 강화 (100G)</button>
+        <button class="crafting-btn" type="button" onclick="craftPickaxe('gold_mult')">골드 배율 강화 (150G)</button>
+        <button class="crafting-btn" type="button" onclick="craftPickaxe('depth_access')">층 접근 강화 (200G)</button>
       </div>
     </div>
   </div>
@@ -187,7 +183,7 @@
         <span class="stat-val" id="lv-val">1</span>
       </div>
       <div class="stat-row">
-        <span class="stat-label" data-i18n="pickaxe">PICKAXE</span>
+        <span class="stat-label" data-i18n="power">POWER</span>
         <span class="stat-val" id="pick-val">Wood Lv.1</span>
       </div>
       <div class="stat-row">
