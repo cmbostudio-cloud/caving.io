@@ -3,7 +3,8 @@
 // ============================================================
 
 const MAP_SIZE = 30;
-const VIEW_SIZE = 11;
+const VIEW_W = 15;
+const VIEW_H = 9;
 const MAP_W = MAP_SIZE;
 const MAP_H = MAP_SIZE;
 const MAP_LAST_X = MAP_W - 1;
@@ -237,6 +238,8 @@ function applyLanguage() {
     const key = upgradeLabelKey[btn.dataset.upgrade];
     if (key) btn.textContent = t(key);
   });
+  const allocOpen = document.getElementById('stat-alloc-list')?.classList.contains('open') ?? true;
+  updateStatToggleLabel(allocOpen);
   if (G.map) render();
   else updateSelectionInfo();
 }
@@ -251,6 +254,23 @@ function setLanguage(language) {
   SETTINGS.language = language === 'ko' ? 'ko' : 'en';
   saveSettings();
   applyLanguage();
+}
+
+
+function updateStatToggleLabel(isOpen) {
+  const toggle = document.getElementById('alloc-toggle');
+  if (!toggle) return;
+  toggle.textContent = `${t('statPoints')} ${isOpen ? '∨' : '>'}`;
+}
+
+function toggleStatPoints(forceOpen) {
+  const panel = document.getElementById('stat-alloc-list');
+  const toggle = document.getElementById('alloc-toggle');
+  if (!panel || !toggle) return;
+  const willOpen = typeof forceOpen === 'boolean' ? forceOpen : !panel.classList.contains('open');
+  panel.classList.toggle('open', willOpen);
+  toggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+  updateStatToggleLabel(willOpen);
 }
 
 function setMinimapEnabled(enabled) {
@@ -918,21 +938,23 @@ function areaLabel() {
 }
 
 function getViewportBounds() {
-  const half = Math.floor(VIEW_SIZE / 2);
-  const minX = Math.max(0, Math.min(G.px - half, MAP_W - VIEW_SIZE));
-  const minY = Math.max(0, Math.min(G.py - half, MAP_H - VIEW_SIZE));
+  const halfW = Math.floor(VIEW_W / 2);
+  const halfH = Math.floor(VIEW_H / 2);
+  const minX = Math.max(0, Math.min(G.px - halfW, MAP_W - VIEW_W));
+  const minY = Math.max(0, Math.min(G.py - halfH, MAP_H - VIEW_H));
   return {
     startX: minX,
     startY: minY,
-    endX: Math.min(MAP_W - 1, minX + VIEW_SIZE - 1),
-    endY: Math.min(MAP_H - 1, minY + VIEW_SIZE - 1),
+    endX: Math.min(MAP_W - 1, minX + VIEW_W - 1),
+    endY: Math.min(MAP_H - 1, minY + VIEW_H - 1),
   };
 }
 
 function render() {
   const canvas = UI.mapCanvas();
   const view = getViewportBounds();
-  canvas.style.setProperty('--map-size', VIEW_SIZE);
+  canvas.style.setProperty('--map-cols', VIEW_W);
+  canvas.style.setProperty('--map-rows', VIEW_H);
   canvas.className = `area-${G.area || 'mine'}`;
   let html = '';
   for (let y = view.startY; y <= view.endY; y++) {
@@ -1024,7 +1046,7 @@ function renderMiniMap() {
   const view = getViewportBounds();
   ctx.strokeStyle = '#ffeb3b';
   ctx.lineWidth = 1;
-  ctx.strokeRect(view.startX * cw, view.startY * ch, VIEW_SIZE * cw, VIEW_SIZE * ch);
+  ctx.strokeRect(view.startX * cw, view.startY * ch, VIEW_W * cw, VIEW_H * ch);
   ctx.fillStyle = '#ff4444';
   ctx.fillRect(G.px * cw, G.py * ch, Math.max(2, cw), Math.max(2, ch));
 }
