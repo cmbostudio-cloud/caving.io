@@ -253,6 +253,16 @@ function setLanguage(language) {
   applyLanguage();
 }
 
+
+function toggleStatPoints(forceOpen) {
+  const panel = document.getElementById('stat-alloc-list');
+  const toggle = document.getElementById('alloc-toggle');
+  if (!panel || !toggle) return;
+  const willOpen = typeof forceOpen === 'boolean' ? forceOpen : !panel.classList.contains('open');
+  panel.classList.toggle('open', willOpen);
+  toggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+}
+
 function setMinimapEnabled(enabled) {
   SETTINGS.minimapEnabled = enabled !== false;
   saveSettings();
