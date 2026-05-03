@@ -1410,7 +1410,7 @@ body[data-layout="square"] #map-canvas {
 }
 
 :root {
-  --map-cols: 13;
+  --map-cols: 15;
   --map-rows: 9;
 }
 
@@ -1431,7 +1431,7 @@ body[data-layout="square"] #map-canvas {
 #map-canvas {
   width: 100%;
   height: 100%;
-  aspect-ratio: 13 / 9;
+  aspect-ratio: 15 / 9;
   grid-template-columns: repeat(var(--map-cols), 1fr);
   grid-template-rows: repeat(var(--map-rows), 1fr);
   font-size: clamp(15px, 1.8vw, 24px);
@@ -1445,10 +1445,10 @@ body[data-layout="square"] #map-canvas {
 }
 
 #alloc-panel { left: 10px; top: 34px; width: 240px; z-index: 7; }
-#stats-panel { right: 10px; top: 34px; width: 240px; z-index: 7; }
-#mini-map { top: 34px; right: 260px; }
-#return-link { top: 132px; right: 260px; z-index: 8; }
-#status-panel { left: 50%; transform: translateX(-50%); bottom: 10px; width: min(70%, 760px); margin-top: 0; z-index: 7; }
+#stats-panel { right: 10px; top: 34px; width: 260px; z-index: 7; }
+#mini-map { top: 34px; right: 280px; }
+#return-link { top: 132px; right: 280px; z-index: 8; }
+#status-panel { left: 50%; transform: translateX(-50%); bottom: 10px; width: min(88%, 1100px); margin-top: 0; z-index: 7; }
 
 @media (max-width: 980px) {
   #map-panel { height: calc(var(--app-vh, 100dvh) - 72px); }

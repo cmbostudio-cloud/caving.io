@@ -3,7 +3,7 @@
 // ============================================================
 
 const MAP_SIZE = 30;
-const VIEW_W = 13;
+const VIEW_W = 15;
 const VIEW_H = 9;
 const MAP_W = MAP_SIZE;
 const MAP_H = MAP_SIZE;
@@ -238,6 +238,8 @@ function applyLanguage() {
     const key = upgradeLabelKey[btn.dataset.upgrade];
     if (key) btn.textContent = t(key);
   });
+  const allocOpen = document.getElementById('stat-alloc-list')?.classList.contains('open') ?? true;
+  updateStatToggleLabel(allocOpen);
   if (G.map) render();
   else updateSelectionInfo();
 }
@@ -255,6 +257,12 @@ function setLanguage(language) {
 }
 
 
+function updateStatToggleLabel(isOpen) {
+  const toggle = document.getElementById('alloc-toggle');
+  if (!toggle) return;
+  toggle.textContent = `${t('statPoints')} ${isOpen ? '∨' : '>'}`;
+}
+
 function toggleStatPoints(forceOpen) {
   const panel = document.getElementById('stat-alloc-list');
   const toggle = document.getElementById('alloc-toggle');
@@ -262,6 +270,7 @@ function toggleStatPoints(forceOpen) {
   const willOpen = typeof forceOpen === 'boolean' ? forceOpen : !panel.classList.contains('open');
   panel.classList.toggle('open', willOpen);
   toggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+  updateStatToggleLabel(willOpen);
 }
 
 function setMinimapEnabled(enabled) {
