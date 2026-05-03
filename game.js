@@ -176,18 +176,7 @@ function materialName(material) {
 function rnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 function rndChoice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
-function log(message, type = 'sys') {
-  const list = document.getElementById('log-list');
-  if (!list) return;
-  const line = document.createElement('div');
-  line.className = `log-line log-${type}`;
-  line.textContent = message;
-  list.appendChild(line);
-  while (list.children.length > 180) {
-    list.removeChild(list.firstChild);
-  }
-  list.scrollTop = list.scrollHeight;
-}
+function log(message, type = 'sys') { /* log panel removed */ }
 
 function loadSettings() {
   try {
@@ -553,12 +542,8 @@ function checkLevelUp() {
     G.xp -= G.xpNext;
     G.level++;
     G.xpNext = Math.floor(G.xpNext * 1.5);
-    G.hpMax = Math.floor(G.hpMax * 1.1);
-    G.stamMax = Math.floor(G.stamMax * 1.1);
-    G.hp = G.hpMax;
-    G.stam = G.stamMax;
+    G.statPoints = (G.statPoints || 0) + 1;
     log(t('levelUp', G.level), 'info');
-    log(t('maxUp'), 'ok');
   }
 }
 
@@ -744,6 +729,7 @@ function initGame() {
     miningSpeed: 1,
     goldMult: 1,
     depthAccess: 1,
+    statPoints: 0,
     gold: 0,
     map: null,
     selected: null,
@@ -914,6 +900,8 @@ function render() {
   document.getElementById('pick-val').textContent = `SPD x${G.miningSpeed.toFixed(1)} / GOLD x${G.goldMult.toFixed(1)} / DEPTH B${G.depthAccess}`;
   document.getElementById('depth-val').textContent = areaLabel();
   document.getElementById('gold-val').textContent = G.gold || 0;
+  const sp = document.getElementById('stat-points-val');
+  if (sp) sp.textContent = G.statPoints || 0;
   document.getElementById('map-title').textContent =
     G.area === 'mine' ? t('dungeonMap') :
       G.area === 'shop' ? t('shopMap') :
@@ -1124,6 +1112,20 @@ function craftPickaxe(id) {
   render();
 }
 
+
+function allocateStat(stat) {
+  if (!G.map || G.gameOver) return;
+  if ((G.statPoints || 0) <= 0) return;
+  if (stat === 'hp') { G.hpMax += 10; G.hp = Math.min(G.hpMax, G.hp + 10); }
+  else if (stat === 'stamina') { G.stamMax += 10; G.stam = Math.min(G.stamMax, G.stam + 10); }
+  else if (stat === 'mining_speed') { G.miningSpeed = Number((G.miningSpeed + 0.1).toFixed(1)); }
+  else if (stat === 'gold_mult') { G.goldMult = Number((G.goldMult + 0.1).toFixed(1)); }
+  else if (stat === 'depth_access') { G.depthAccess = Math.min(9, G.depthAccess + 1); }
+  else return;
+  G.statPoints -= 1;
+  render();
+}
+
 function saveGame() {
   if (!G.map || G.gameOver) return;
   try {
@@ -1142,6 +1144,7 @@ function saveGame() {
         miningSpeed: G.miningSpeed,
       goldMult: G.goldMult,
       depthAccess: G.depthAccess,
+      statPoints: G.statPoints || 0,
       gold: G.gold || 0,
       map: G.map,
       plazaMap: G.plazaMap,
@@ -1179,6 +1182,7 @@ function loadGame() {
         miningSpeed: Number(saved.miningSpeed) || 1,
       goldMult: Number(saved.goldMult) || 1,
       depthAccess: Number(saved.depthAccess) || 1,
+      statPoints: saved.statPoints ?? 0,
       gold: saved.gold ?? 0,
       map: saved.map,
       selected: saved.selected || null,
