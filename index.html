@@ -29,8 +29,8 @@
   <div id="title-bar">
     <div class="title-text">caving<span>.io</span></div>
     <div class="title-actions">
-      <button id="install-btn" type="button" onclick="installGame()" hidden>INSTALL</button>
-      <button id="settings-btn" type="button" onclick="toggleSettings()" aria-expanded="false">SET</button>
+      <button id="install-btn" type="button" onclick="installGame()" hidden data-i18n="install">INSTALL</button>
+      <button id="settings-btn" type="button" onclick="toggleSettings()" aria-expanded="false" data-i18n="settingsShort">SET</button>
     </div>
   </div>
 
@@ -74,9 +74,9 @@
         <button class="modal-close" type="button" onclick="toggleCrafting(false)">✕</button>
       </div>
       <div class="crafting-list">
-        <button class="crafting-btn" type="button" onclick="craftPickaxe('damage')">데미지 강화 (100G)</button>
-        <button class="crafting-btn" type="button" onclick="craftPickaxe('gold_mult')">획득 골드 강화 (180G)</button>
-        <button class="crafting-btn" type="button" onclick="craftPickaxe('attack_speed')">공격 속도 강화 (150G)</button>
+        <button class="crafting-btn" type="button" onclick="craftPickaxe('damage')" data-upgrade="damage">DMG UP (100G)</button>
+        <button class="crafting-btn" type="button" onclick="craftPickaxe('gold_mult')" data-upgrade="gold_mult">GOLD UP (180G)</button>
+        <button class="crafting-btn" type="button" onclick="craftPickaxe('attack_speed')" data-upgrade="attack_speed">ASPD UP (150G)</button>
       </div>
     </div>
   </div>
@@ -145,12 +145,12 @@
     </div>
 
     <div class="panel" id="alloc-panel">
-      <div class="panel-title">STAT POINTS</div>
-      <div class="stat-row"><span class="stat-label">POINTS</span><span class="stat-val" id="stat-points-val">0</span></div>
+      <div class="panel-title" data-i18n="statPoints">STAT POINTS</div>
+      <div class="stat-row"><span class="stat-label" data-i18n="points">POINTS</span><span class="stat-val" id="stat-points-val">0</span></div>
       <div id="stat-alloc-list">
-        <div class="alloc-row"><span>데미지 증가</span><button type="button" class="alloc-plus" onclick="allocateStat('damage')">[+]</button></div>
-        <div class="alloc-row"><span>공격 속도 증가</span><button type="button" class="alloc-plus" onclick="allocateStat('attack_speed')">[+]</button></div>
-        <div class="alloc-row"><span>획득 골드 비율 증가</span><button type="button" class="alloc-plus" onclick="allocateStat('gold_mult')">[+]</button></div>
+        <div class="alloc-row"><span data-i18n="statDamage">Damage Up</span><button type="button" class="alloc-plus" onclick="allocateStat('damage')">[+]</button></div>
+        <div class="alloc-row"><span data-i18n="statAttackSpeed">Attack Speed Up</span><button type="button" class="alloc-plus" onclick="allocateStat('attack_speed')">[+]</button></div>
+        <div class="alloc-row"><span data-i18n="statGoldMult">Gold Rate Up</span><button type="button" class="alloc-plus" onclick="allocateStat('gold_mult')">[+]</button></div>
       </div>
     </div>
 
