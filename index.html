@@ -67,83 +67,16 @@
     </div>
   </div>
 
-  <!-- Inventory Overlay (game.js의 toggleInventory()가 참조) -->
-  <div id="inventory-overlay" hidden>
-    <div id="inventory-window">
-      <div class="inventory-head">
-        <div class="panel-title" data-i18n="inventory">INVENTORY</div>
-        <div class="inventory-head-actions">
-          <div class="inventory-tabs" role="tablist" aria-label="Inventory tabs">
-            <button id="inventory-tab-items" type="button" role="tab" class="inventory-tab active" data-i18n="itemsTab"
-              onclick="setInventoryTab('items')">ITEMS</button>
-            <button id="inventory-tab-equipment" type="button" role="tab" class="inventory-tab" data-i18n="equipmentTab"
-              onclick="setInventoryTab('equipment')">EQUIPMENT</button>
-          </div>
-          <button id="inventory-close" type="button" onclick="toggleInventory(false)">✕</button>
-        </div>
-      </div>
-      <div class="inventory-body">
-        <div class="inventory-profile">
-          <div class="player-card">
-            <div id="pickaxe-slot" class="player-pickaxe-slot"
-              draggable="true" ondragstart="onEquippedPickaxeDragStart(event)"
-              ondragover="event.preventDefault();this.classList.add('is-drop-target')"
-              ondragleave="this.classList.remove('is-drop-target')" ondrop="onPickaxeDrop(event)">
-            </div>
-            <div class="player-avatar">
-              <!-- 7x7 pixel avatar grid -->
-              <span></span><span></span><span class="on"></span><span class="on"></span><span
-                class="on"></span><span></span><span></span>
-              <span></span><span class="on"></span><span></span><span></span><span></span><span
-                class="on"></span><span></span>
-              <span class="on"></span><span></span><span class="on"></span><span class="on"></span><span
-                class="on"></span><span></span><span class="on"></span>
-              <span class="on"></span><span></span><span class="on"></span><span></span><span
-                class="on"></span><span></span><span class="on"></span>
-              <span class="on"></span><span></span><span class="on"></span><span class="on"></span><span
-                class="on"></span><span></span><span class="on"></span>
-              <span></span><span class="on"></span><span></span><span></span><span></span><span
-                class="on"></span><span></span>
-              <span></span><span></span><span class="on"></span><span class="on"></span><span
-                class="on"></span><span></span><span></span>
-            </div>
-          </div>
-          <div class="inventory-stats">
-            <div id="inventory-stats-list"></div>
-          </div>
-        </div>
-        <div class="inventory-materials">
-          <div id="inventory-card-grid"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Exchange Overlay (game.js의 toggleExchange()가 참조) -->
-  <div id="exchange-overlay" hidden>
-    <div id="exchange-window">
-      <div class="modal-head" style="padding:10px;border-bottom:1px solid var(--border)">
-        <div class="panel-title" data-i18n="exchange">EXCHANGE</div>
-        <button id="exchange-close" type="button" onclick="toggleExchange(false)">✕</button>
-      </div>
-      <div class="exchange-summary">
-        <span data-i18n="gold">GOLD</span>
-        <strong id="exchange-gold-val">0</strong>
-      </div>
-      <div id="exchange-list"></div>
-    </div>
-  </div>
-
-
   <div id="crafting-overlay" hidden>
     <div id="crafting-window">
       <div class="modal-head crafting-head">
-        <div class="panel-title" data-i18n="crafting">CRAFTING</div>
+        <div class="panel-title" data-i18n="upgrades">UPGRADES</div>
         <button class="modal-close" type="button" onclick="toggleCrafting(false)">✕</button>
       </div>
       <div class="crafting-list">
-        <button class="crafting-btn" type="button" onclick="craftPickaxe('wood_pickaxe')" data-i18n="craftWoodPickaxeReq">나무 곡괭이 제작 (재료: 나무판자 5개)</button>
-        <button class="crafting-btn" type="button" onclick="craftPickaxe('stone_pickaxe')" data-i18n="craftStonePickaxeReq">돌 곡괭이 제작 (재료: 나무 곡괭이 + 철광석 5개 + 석탄 3개)</button>
+        <button class="crafting-btn" type="button" onclick="craftPickaxe('damage')">데미지 강화 (100G)</button>
+        <button class="crafting-btn" type="button" onclick="craftPickaxe('gold_mult')">획득 골드 강화 (180G)</button>
+        <button class="crafting-btn" type="button" onclick="craftPickaxe('attack_speed')">공격 속도 강화 (150G)</button>
       </div>
     </div>
   </div>
@@ -187,7 +120,7 @@
         <span class="stat-val" id="lv-val">1</span>
       </div>
       <div class="stat-row">
-        <span class="stat-label" data-i18n="pickaxe">PICKAXE</span>
+        <span class="stat-label" data-i18n="power">POWER</span>
         <span class="stat-val" id="pick-val">Wood Lv.1</span>
       </div>
       <div class="stat-row">
@@ -200,8 +133,6 @@
         <span class="stat-val" id="gold-val">0</span>
       </div>
 
-      <div class="panel-title" style="margin-top:10px" data-i18n="inventory">INVENTORY</div>
-      <div id="inv-list"></div>
     </div>
 
     <div class="panel" id="action-panel">
@@ -209,13 +140,18 @@
       <div id="selection-info">NO TILE SELECTED</div>
       <div class="action-grid">
         <button class="action-btn" type="button" data-i18n="return" onclick="tryReturn()">RETURN (R)</button>
-        <button class="action-btn" type="button" data-i18n="inventoryButton" onclick="toggleInventory()">INVENTORY (I)</button>
+        
       </div>
     </div>
 
-    <div class="panel" id="log-panel">
-      <div class="panel-title" data-i18n="log">LOG</div>
-      <div id="log-list"></div>
+    <div class="panel" id="alloc-panel">
+      <div class="panel-title">STAT POINTS</div>
+      <div class="stat-row"><span class="stat-label">POINTS</span><span class="stat-val" id="stat-points-val">0</span></div>
+      <div id="stat-alloc-list">
+        <div class="alloc-row"><span>데미지 증가</span><button type="button" class="alloc-plus" onclick="allocateStat('damage')">[+]</button></div>
+        <div class="alloc-row"><span>공격 속도 증가</span><button type="button" class="alloc-plus" onclick="allocateStat('attack_speed')">[+]</button></div>
+        <div class="alloc-row"><span>획득 골드 비율 증가</span><button type="button" class="alloc-plus" onclick="allocateStat('gold_mult')">[+]</button></div>
+      </div>
     </div>
 
   </div>

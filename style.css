@@ -1299,3 +1299,8 @@ body[data-layout="square"] #map-canvas {
     max-height: none;
   }
 }
+
+#stat-alloc-list { display:flex; flex-direction:column; gap:10px; margin-top:10px; }
+.alloc-row { display:flex; justify-content:space-between; align-items:center; font-size:20px; letter-spacing:0.08em; border:none; }
+.alloc-plus { background:transparent; border:none; color:var(--text); font-size:20px; cursor:pointer; padding:0 4px; }
+.alloc-plus:hover { color:var(--gold); }
