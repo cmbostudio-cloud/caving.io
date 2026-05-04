@@ -1781,20 +1781,20 @@ body {
 
 /* Auto mobile viewport optimization */
 body[data-mobile="true"] #map-canvas {
-  top: 50%;
-  left: 50%;
-  right: auto;
-  bottom: auto;
-  width: min(100vw, calc(var(--app-vh, 100dvh) * (var(--map-cols) / var(--map-rows))));
-  height: min(var(--app-vh, 100dvh), calc(100vw * (var(--map-rows) / var(--map-cols))));
-  transform: translate(-50%, -50%);
+  top: 50% !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: min(100vw, calc(var(--app-vh, 100dvh) * (var(--map-cols) / var(--map-rows)))) !important;
+  height: min(var(--app-vh, 100dvh), calc(100vw * (var(--map-rows) / var(--map-cols)))) !important;
+  transform: translate(-50%, -50%) !important;
   aspect-ratio: calc(var(--map-cols) / var(--map-rows)) !important;
 }
 
 @media (max-width: 1024px) and (orientation: portrait) {
   body[data-mobile="true"] #map-canvas {
-    width: min(100vw, calc(var(--app-vh, 100dvh) * 0.95));
-    height: min(var(--app-vh, 100dvh), calc(100vw * 0.95));
+    width: min(100vw, calc(var(--app-vh, 100dvh) * 0.95)) !important;
+    height: min(var(--app-vh, 100dvh), calc(100vw * 0.95)) !important;
     aspect-ratio: 1 / 1 !important;
   }
 }
