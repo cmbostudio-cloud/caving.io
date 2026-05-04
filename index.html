@@ -1,17 +1,44 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>caving.io</title>
+
+  <!-- index.html 캐시 방지 -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#0a0a0a">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="stylesheet" href="style.css">
+
+  <link rel="stylesheet" href="style.css" data-cache-bust="true">
+
+  <script>
+    (function () {
+      const VERSION = Date.now().toString();
+      const appendVersion = (url) => {
+        if (!url) return url;
+        const hasQuery = url.includes('?');
+        return `${url}${hasQuery ? '&' : '?'}v=${VERSION}`;
+      };
+
+      // CSS 캐시 버스팅
+      document.querySelectorAll('link[rel="stylesheet"][data-cache-bust="true"]').forEach((link) => {
+        link.href = appendVersion(link.getAttribute('href'));
+      });
+
+      // 전역으로 노출하여 JS 로더/기타 로직에서 재사용
+      window.__ASSET_VERSION__ = VERSION;
+      window.__appendVersion__ = appendVersion;
+    })();
+  </script>
 </head>
 
 <body>
@@ -145,9 +172,62 @@
   </div>
 
   <button id="settings-btn" class="floating-settings" type="button" onclick="toggleSettings()" aria-expanded="false" data-i18n="settings">SETTINGS</button>
-<script src="js/bootstrap.js"></script>
-<script src="game.js"></script>
-  <script src="pwa.js"></script>
+
+  <script>
+    (function () {
+      const scripts = ['js/bootstrap.js', 'game.js', 'pwa.js'];
+
+      function loadScriptsSequentially(list) {
+        if (!list.length) return;
+        const [current, ...rest] = list;
+        const el = document.createElement('script');
+        el.src = window.__appendVersion__(current);
+        el.onload = () => loadScriptsSequentially(rest);
+        document.body.appendChild(el);
+      }
+
+      loadScriptsSequentially(scripts);
+
+      // 서비스 워커 즉시 업데이트 적용
+      if ('serviceWorker' in navigator) {
+        let refreshing = false;
+
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (refreshing) return;
+          refreshing = true;
+          window.location.reload();
+        });
+
+        navigator.serviceWorker.getRegistration().then((registration) => {
+          if (!registration) return;
+
+          const requestSkipWaiting = (worker) => {
+            if (!worker) return;
+            worker.postMessage({ type: 'SKIP_WAITING' });
+          };
+
+          if (registration.waiting) {
+            requestSkipWaiting(registration.waiting);
+          }
+
+          registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing;
+            if (!newWorker) return;
+
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                requestSkipWaiting(newWorker);
+              }
+            });
+          });
+
+          registration.update().catch(() => {
+            // 네트워크 상황에 따라 update 실패 가능 (무시)
+          });
+        });
+      }
+    })();
+  </script>
 </body>
 
 </html>
