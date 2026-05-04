@@ -1563,8 +1563,8 @@ body {
 #alloc-panel {
   top: 18px;
   left: 18px;
-  width: min(25vw, 320px);
-  min-width: 220px;
+  width: min(12.5vw, 160px);
+  min-width: 110px;
   padding: 0;
   border: 0;
   background: transparent;
@@ -1582,7 +1582,16 @@ body {
   color: var(--bright);
   background: transparent;
   text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   font-family: 'Share Tech Mono', monospace;
+}
+
+#alloc-toggle .toggle-value {
+  color: var(--bright);
+  text-align: right;
 }
 
 #stat-alloc-list {
@@ -1685,8 +1694,8 @@ body {
   flex-direction: column;
   gap: 6px;
   margin: 0;
-  width: min(25vw, 320px);
-  min-width: 220px;
+  width: min(12.5vw, 160px);
+  min-width: 110px;
   padding: 0;
   margin-left: 0;
   margin-right: 0;

@@ -272,7 +272,7 @@ function updateStatToggleLabel(isOpen) {
   const toggle = document.getElementById('alloc-toggle');
   if (!toggle) return;
   const points = G?.statPoints ?? 0;
-  toggle.textContent = `${t('statPoints')} ${isOpen ? '▾' : '▸'}   ${points}`;
+  toggle.innerHTML = `<span class="toggle-label">${t('statPoints')} ${isOpen ? '▾' : '▸'}</span><span class="toggle-value">${points}</span>`;
 }
 
 function toggleStatPoints(forceOpen) {
