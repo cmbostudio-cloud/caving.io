@@ -2001,3 +2001,62 @@ body[data-mobile="true"] .floating-settings {
     right: calc(max(8px, env(safe-area-inset-right)) + 86px);
   }
 }
+
+
+/* Remove mobile tap blue highlight / focus flash */
+body[data-mobile="true"],
+body[data-mobile="true"] * {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Pixel-clean rectangular sheet styling */
+body[data-mobile="true"] #status-panel,
+body[data-mobile="true"] .status-item {
+  border-radius: 0 !important;
+}
+
+/* Landscape: keep collapsible sheet docked and preserve map tile ratio above it */
+@media (max-width: 1024px) and (orientation: landscape) {
+  body[data-mobile="true"] {
+    --mobile-sheet-collapsed: 46px;
+  }
+
+  body[data-mobile="true"] #status-panel {
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: none !important;
+    border-left: 0;
+    border-right: 0;
+    border-bottom: 0;
+    padding: 6px 10px 8px;
+    z-index: 60;
+  }
+
+  body[data-mobile="true"] #status-toggle {
+    padding: 0 2px 6px;
+    min-height: 30px;
+    display: block;
+  }
+
+  body[data-mobile="true"] #map-canvas {
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: var(--mobile-sheet-collapsed) !important;
+    width: 100% !important;
+    height: calc(100% - var(--mobile-sheet-collapsed)) !important;
+    transform: none !important;
+    aspect-ratio: calc(var(--map-cols) / var(--map-rows)) !important;
+  }
+
+  body[data-mobile="true"] #core-status-row.open {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+body[data-mobile="true"] button:focus,
+body[data-mobile="true"] button:focus-visible {
+  outline: none;
+}
