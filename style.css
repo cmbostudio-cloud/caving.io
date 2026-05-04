@@ -1524,24 +1524,23 @@ body[data-layout="square"] #map-canvas {
 
 /* Immersive fullscreen layout override */
 body {
-  width: 100vw;
-  height: 100vh;
-  min-height: 100vh;
+  width: 100%;
+  height: var(--app-vh, 100dvh);
+  min-height: var(--app-vh, 100dvh);
+  margin: 0;
   padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
 }
 
 #main-layout {
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   max-width: none;
 }
 
 #map-panel {
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   border: 0;
   background: #050505;
   padding: 0;
@@ -1549,10 +1548,15 @@ body {
 
 #map-canvas {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  aspect-ratio: auto;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  aspect-ratio: auto !important;
+  align-self: stretch !important;
   border: 0;
 }
 
@@ -1569,9 +1573,39 @@ body {
   padding: 0;
   margin: 0;
   letter-spacing: 1px;
-  font-size: 15px;
+  font-size: 13px;
   color: var(--bright);
   font-family: 'Share Tech Mono', monospace;
+}
+
+#stat-alloc-list {
+  margin-top: 8px;
+  display: none;
+  gap: 6px;
+}
+
+#stat-alloc-list.open {
+  display: grid;
+}
+
+#alloc-panel .alloc-row {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--text);
+}
+
+#alloc-panel .alloc-plus {
+  font-size: 12px;
+  min-width: 30px;
+  padding: 1px 7px;
+  border-color: #2f3a2f;
+}
+
+#alloc-panel .alloc-plus:hover,
+#alloc-panel .alloc-plus:focus-visible {
+  color: var(--lime);
+  border-color: var(--lime);
+  outline: none;
 }
 
 #stats-panel,
@@ -1592,10 +1626,38 @@ body {
   background: rgba(0,0,0,0.75);
 }
 
+
+
+#status-toggle {
+  width: 100%;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+  color: var(--bright);
+}
+
+#core-status-row,
+#meta-stack {
+  display: none;
+}
+
+#core-status-row.open {
+  display: flex;
+}
+
+#meta-stack.open {
+  display: flex;
+}
+
+#map-canvas .tile-glyph,
+#map-canvas .terrain-underlay {
+  font-size: 1.05em;
+}
+
 #status-panel {
-  left: 8px;
+  left: 18px;
   right: auto;
-  bottom: 8px;
+  bottom: 18px;
   transform: none;
   width: auto;
   padding: 0;
