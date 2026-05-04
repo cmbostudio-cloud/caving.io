@@ -1549,10 +1549,13 @@ body {
 
 #map-canvas {
   position: absolute;
-  inset: 0;
+  left: 0;
+  right: 0;
+  top: 0;
+  margin: 0 auto;
   width: 100vw;
-  height: 100vh;
-  aspect-ratio: 9 / 16;
+  height: min(100vh, calc(100vw * 9 / 16));
+  aspect-ratio: 16 / 9;
   border: 0;
 }
 
@@ -1607,11 +1610,13 @@ body {
   flex-direction: column;
   gap: 8px;
   margin: 0;
-  width: 100vw;
+  width: min(88vw, 1100px);
   padding: 0;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.status-item { padding: 6px 10px; width: 100vw; border-left: 0; border-right: 0; }
+.status-item { padding: 6px 10px; width: 100%; border-left: 0; border-right: 0; }
 
 .meta-row {
   justify-content: space-between;
