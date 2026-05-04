@@ -311,4 +311,3 @@ function setMinimapEnabled(enabled) {
   applyLanguage();
   if (G.map) render();
 }
-

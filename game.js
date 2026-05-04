@@ -678,8 +678,6 @@ function areaLabel() {
 
 
 function currentViewSize() {
-  const mobileLandscape = document.body?.dataset?.mobile === 'true' && window.matchMedia('(orientation: landscape)').matches;
-  if (mobileLandscape) return { cols: 17, rows: 8 };
   return { cols: VIEW_W, rows: VIEW_H };
 }
 
