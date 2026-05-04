@@ -1593,15 +1593,13 @@ body {
 #status-panel {
   left: 0;
   right: 0;
-  bottom: 14px;
+  bottom: 0;
   transform: none;
-  width: auto;
-  padding: 0 14px;
-  display: grid;
-  grid-template-columns: minmax(240px, 42vw) minmax(260px, 34vw);
-  justify-content: space-between;
-  align-items: end;
-  gap: 16px;
+  width: 100vw;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 #core-status-row {
@@ -1609,16 +1607,18 @@ body {
   flex-direction: column;
   gap: 8px;
   margin: 0;
+  width: 100vw;
+  padding: 0;
 }
 
-.status-item { padding: 6px 8px; }
+.status-item { padding: 6px 10px; width: 100vw; border-left: 0; border-right: 0; }
 
 .meta-row {
   justify-content: space-between;
-  gap: 24px;
-  padding: 4px 0;
+  gap: 18px;
+  padding: 3px 0;
   border-top: 1px solid rgba(255,255,255,0.1);
   font-size: 14px;
 }
 
-#meta-stack { display: flex; flex-direction: column; gap: 6px; }
+#meta-stack { display: flex; flex-direction: column; gap: 4px; width: min(86vw, 980px); margin: 0 auto 8px; }
