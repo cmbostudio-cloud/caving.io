@@ -1563,8 +1563,8 @@ body {
 #alloc-panel {
   top: 18px;
   left: 18px;
-  width: min(12.5vw, 160px);
-  min-width: 110px;
+  width: min(25vw, 320px);
+  min-width: 220px;
   padding: 0;
   border: 0;
   background: transparent;
@@ -1746,16 +1746,6 @@ body {
     font-size: 11px;
   }
 
-  #status-panel {
-    left: 10px;
-    bottom: 10px;
-  }
-
-  #core-status-row,
-  #meta-stack {
-    width: min(34vw, 300px);
-    min-width: 180px;
-  }
 }
 
 @media (max-width: 1024px) and (orientation: portrait) {
@@ -1779,27 +1769,4 @@ body {
     font-size: 11px;
   }
 
-  #status-panel {
-    left: 10px;
-    right: 10px;
-    bottom: 10px;
-    width: auto;
-  }
-
-  #core-status-row.open {
-    display: grid;
-    grid-template-columns: 1fr;
-    width: 100%;
-    min-width: 0;
-  }
-
-  #meta-stack.open {
-    width: 100%;
-    min-width: 0;
-  }
-
-  .status-head,
-  .meta-row {
-    font-size: 12px;
-  }
 }
