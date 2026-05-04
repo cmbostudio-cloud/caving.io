@@ -1694,8 +1694,9 @@ body {
   flex-direction: column;
   gap: 6px;
   margin: 0;
-  width: min(12.5vw, 160px);
-  min-width: 110px;
+  width: 320px;
+  max-width: min(92vw, 320px);
+  min-width: 220px;
   padding: 0;
   margin-left: 0;
   margin-right: 0;
@@ -1715,7 +1716,7 @@ body {
   font-size: 14px;
 }
 
-#meta-stack { display: none; flex-direction: column; gap: 4px; width: min(25vw, 320px); min-width: 220px; margin: 0; }
+#meta-stack { display: none; flex-direction: column; gap: 4px; width: 320px; max-width: min(92vw, 320px); min-width: 220px; margin: 0; }
 
 #meta-stack.open { display: flex; }
 
