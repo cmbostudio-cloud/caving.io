@@ -1,15 +1,28 @@
 // Core gameplay logic (split from bootstrap.js)
 
-function syncViewportHeight() {
-  const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+function syncViewportMetrics() {
+  const viewport = window.visualViewport;
+  const vh = viewport ? viewport.height : window.innerHeight;
+  const vw = viewport ? viewport.width : window.innerWidth;
   document.documentElement.style.setProperty('--app-vh', `${vh}px`);
+  document.documentElement.style.setProperty('--app-vw', `${vw}px`);
 }
 
-window.addEventListener('resize', syncViewportHeight, { passive: true });
-if (window.visualViewport) {
-  window.visualViewport.addEventListener('resize', syncViewportHeight, { passive: true });
+function syncMobileLayoutMode() {
+  const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
+  const narrowViewport = window.matchMedia('(max-width: 1024px)').matches;
+  document.body.dataset.mobile = coarsePointer || narrowViewport ? 'true' : 'false';
 }
-syncViewportHeight();
+
+window.addEventListener('resize', syncViewportMetrics, { passive: true });
+window.addEventListener('resize', syncMobileLayoutMode, { passive: true });
+window.addEventListener('orientationchange', syncViewportMetrics, { passive: true });
+window.addEventListener('orientationchange', syncMobileLayoutMode, { passive: true });
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', syncViewportMetrics, { passive: true });
+}
+syncViewportMetrics();
+syncMobileLayoutMode();
 
 applyLayoutMode(SETTINGS.layoutMode);
 document.body.dataset.theme = SETTINGS.themeMode || 'dark';
@@ -663,24 +676,33 @@ function areaLabel() {
   return `B${G.depth}F`;
 }
 
+
+function currentViewSize() {
+  const mobileLandscape = document.body?.dataset?.mobile === 'true' && window.matchMedia('(orientation: landscape)').matches;
+  if (mobileLandscape) return { cols: 17, rows: 8 };
+  return { cols: VIEW_W, rows: VIEW_H };
+}
+
 function getViewportBounds() {
-  const halfW = Math.floor(VIEW_W / 2);
-  const halfH = Math.floor(VIEW_H / 2);
-  const minX = Math.max(0, Math.min(G.px - halfW, MAP_W - VIEW_W));
-  const minY = Math.max(0, Math.min(G.py - halfH, MAP_H - VIEW_H));
+  const { cols, rows } = currentViewSize();
+  const halfW = Math.floor(cols / 2);
+  const halfH = Math.floor(rows / 2);
+  const minX = Math.max(0, Math.min(G.px - halfW, MAP_W - cols));
+  const minY = Math.max(0, Math.min(G.py - halfH, MAP_H - rows));
   return {
     startX: minX,
     startY: minY,
-    endX: Math.min(MAP_W - 1, minX + VIEW_W - 1),
-    endY: Math.min(MAP_H - 1, minY + VIEW_H - 1),
+    endX: Math.min(MAP_W - 1, minX + cols - 1),
+    endY: Math.min(MAP_H - 1, minY + rows - 1),
   };
 }
 
 function render() {
   const canvas = UI.mapCanvas();
   const view = getViewportBounds();
-  canvas.style.setProperty('--map-cols', VIEW_W);
-  canvas.style.setProperty('--map-rows', VIEW_H);
+  const { cols, rows } = currentViewSize();
+  canvas.style.setProperty('--map-cols', cols);
+  canvas.style.setProperty('--map-rows', rows);
   canvas.className = `area-${G.area || 'mine'}`;
   let html = '';
   for (let y = view.startY; y <= view.endY; y++) {

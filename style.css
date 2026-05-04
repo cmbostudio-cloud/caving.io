@@ -1778,3 +1778,285 @@ body {
   }
 
 }
+
+/* Auto mobile viewport optimization */
+body[data-mobile="true"] #map-canvas {
+  top: 50% !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: min(var(--app-vw, 100vw), calc(var(--app-vh, 100dvh) * (var(--map-cols) / var(--map-rows)))) !important;
+  height: min(var(--app-vh, 100dvh), calc(var(--app-vw, 100vw) * (var(--map-rows) / var(--map-cols)))) !important;
+  transform: translate(-50%, -50%) !important;
+  aspect-ratio: calc(var(--map-cols) / var(--map-rows)) !important;
+}
+
+@media (max-width: 1024px) and (orientation: portrait) {
+  body[data-mobile="true"] #map-canvas {
+    width: min(var(--app-vw, 100vw), calc(var(--app-vh, 100dvh) * 0.95)) !important;
+    height: min(var(--app-vh, 100dvh), calc(var(--app-vw, 100vw) * 0.95)) !important;
+    aspect-ratio: 1 / 1 !important;
+  }
+}
+
+@media (max-width: 1024px) and (orientation: landscape) {
+  body[data-mobile="true"] #status-panel {
+    bottom: 10px;
+    left: 10px;
+  }
+
+  body[data-mobile="true"] #core-status-row,
+  body[data-mobile="true"] #meta-stack {
+    max-width: min(56vw, 320px);
+  }
+}
+
+
+/* Dedicated compact mobile HUD to prevent oversize/offscreen UI and page scrolling */
+body[data-mobile="true"] {
+  width: 100%;
+  height: var(--app-vh, 100dvh);
+  min-height: var(--app-vh, 100dvh);
+  overflow: hidden !important;
+  position: fixed;
+  inset: 0;
+}
+
+body[data-mobile="true"] #main-layout,
+body[data-mobile="true"] #map-panel {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body[data-mobile="true"] #alloc-panel {
+  left: max(8px, env(safe-area-inset-left)) !important;
+  top: max(8px, env(safe-area-inset-top)) !important;
+  width: clamp(92px, 26vw, 124px) !important;
+  min-width: 92px !important;
+  max-width: 124px !important;
+  padding: 0 !important;
+}
+
+body[data-mobile="true"] #alloc-toggle {
+  font-size: 10px;
+  letter-spacing: 0.03em;
+  padding-bottom: 5px;
+  margin-bottom: 5px;
+}
+
+body[data-mobile="true"] #alloc-panel .alloc-row {
+  font-size: 10px;
+  padding: 5px 6px;
+}
+
+body[data-mobile="true"] #alloc-panel .alloc-plus {
+  min-width: 24px;
+  padding: 0 5px;
+  font-size: 10px;
+}
+
+body[data-mobile="true"] #status-panel {
+  left: max(8px, env(safe-area-inset-left)) !important;
+  right: auto !important;
+  bottom: max(8px, env(safe-area-inset-bottom)) !important;
+  width: min(46vw, 220px);
+  max-width: 220px;
+}
+
+body[data-mobile="true"] #core-status-row,
+body[data-mobile="true"] #meta-stack {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+body[data-mobile="true"] #mini-map {
+  top: max(8px, env(safe-area-inset-top));
+  right: max(8px, env(safe-area-inset-right));
+}
+
+body[data-mobile="true"] #return-link {
+  top: calc(max(8px, env(safe-area-inset-top)) + 84px);
+  right: max(8px, env(safe-area-inset-right));
+}
+
+/* Mobile bottom-sheet status UI (portrait + landscape) */
+body[data-mobile="true"] #status-panel {
+  left: 50% !important;
+  right: auto !important;
+  bottom: max(8px, env(safe-area-inset-bottom)) !important;
+  transform: translateX(-50%) !important;
+  width: min(96vw, 760px) !important;
+  max-width: min(96vw, 760px) !important;
+  background: rgba(10, 10, 10, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 8px 10px 10px;
+  backdrop-filter: blur(3px);
+}
+
+body[data-mobile="true"] #status-toggle {
+  position: relative;
+  width: 100%;
+  text-align: left;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  margin: 0;
+  padding: 2px 2px 8px;
+}
+
+body[data-mobile="true"] #status-toggle::before {
+  content: '';
+  display: block;
+  width: 44px;
+  height: 4px;
+  border-radius: 999px;
+  margin: 0 auto 8px;
+  background: rgba(255,255,255,0.3);
+}
+
+body[data-mobile="true"] #core-status-row {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  gap: 8px;
+}
+
+body[data-mobile="true"] #core-status-row.open {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+body[data-mobile="true"] .status-item {
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+}
+
+body[data-mobile="true"] #meta-stack {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+body[data-mobile="true"] #meta-stack.open {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px 12px;
+}
+
+body[data-mobile="true"] .meta-row {
+  border-top: 0;
+  padding: 0;
+  font-size: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+@media (max-width: 720px) {
+  body[data-mobile="true"] #core-status-row.open {
+    grid-template-columns: 1fr;
+  }
+
+  body[data-mobile="true"] #meta-stack.open {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+
+/* Landscape fixes: remove top black gap, guarantee bottom sheet visibility */
+@media (max-width: 1024px) and (orientation: landscape) {
+  body[data-mobile="true"] #map-canvas {
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    transform: none !important;
+    aspect-ratio: auto !important;
+  }
+
+  body[data-mobile="true"] #status-panel {
+    z-index: 40;
+  }
+}
+
+/* Keep settings button away from mobile bottom sheet */
+body[data-mobile="true"] .floating-settings {
+  top: max(10px, env(safe-area-inset-top));
+  right: calc(max(10px, env(safe-area-inset-right)) + 96px);
+  bottom: auto;
+  z-index: 45;
+}
+
+@media (max-width: 720px) {
+  body[data-mobile="true"] .floating-settings {
+    right: calc(max(8px, env(safe-area-inset-right)) + 86px);
+  }
+}
+
+
+/* Remove mobile tap blue highlight / focus flash */
+body[data-mobile="true"],
+body[data-mobile="true"] * {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Pixel-clean rectangular sheet styling */
+body[data-mobile="true"] #status-panel,
+body[data-mobile="true"] .status-item {
+  border-radius: 0 !important;
+}
+
+/* Landscape: keep collapsible sheet docked and preserve map tile ratio above it */
+@media (max-width: 1024px) and (orientation: landscape) {
+  body[data-mobile="true"] {
+    --mobile-sheet-collapsed: 46px;
+  }
+
+  body[data-mobile="true"] #status-panel {
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: none !important;
+    border-left: 0;
+    border-right: 0;
+    border-bottom: 0;
+    padding: 6px 10px 8px;
+    z-index: 60;
+  }
+
+  body[data-mobile="true"] #status-toggle {
+    padding: 0 2px 6px;
+    min-height: 30px;
+    display: block;
+  }
+
+  body[data-mobile="true"] #map-canvas {
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: var(--mobile-sheet-collapsed) !important;
+    width: 100% !important;
+    height: calc(100% - var(--mobile-sheet-collapsed)) !important;
+    transform: none !important;
+    aspect-ratio: calc(var(--map-cols) / var(--map-rows)) !important;
+  }
+
+  body[data-mobile="true"] #core-status-row.open {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+body[data-mobile="true"] button:focus,
+body[data-mobile="true"] button:focus-visible {
+  outline: none;
+}
