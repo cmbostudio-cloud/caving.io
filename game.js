@@ -5,11 +5,19 @@ function syncViewportHeight() {
   document.documentElement.style.setProperty('--app-vh', `${vh}px`);
 }
 
+function syncMobileLayoutMode() {
+  const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
+  const narrowViewport = window.matchMedia('(max-width: 1024px)').matches;
+  document.body.dataset.mobile = coarsePointer || narrowViewport ? 'true' : 'false';
+}
+
 window.addEventListener('resize', syncViewportHeight, { passive: true });
+window.addEventListener('resize', syncMobileLayoutMode, { passive: true });
 if (window.visualViewport) {
   window.visualViewport.addEventListener('resize', syncViewportHeight, { passive: true });
 }
 syncViewportHeight();
+syncMobileLayoutMode();
 
 applyLayoutMode(SETTINGS.layoutMode);
 document.body.dataset.theme = SETTINGS.themeMode || 'dark';

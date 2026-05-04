@@ -1778,3 +1778,35 @@ body {
   }
 
 }
+
+/* Auto mobile viewport optimization */
+body[data-mobile="true"] #map-canvas {
+  top: 50% !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: min(100vw, calc(var(--app-vh, 100dvh) * (var(--map-cols) / var(--map-rows)))) !important;
+  height: min(var(--app-vh, 100dvh), calc(100vw * (var(--map-rows) / var(--map-cols)))) !important;
+  transform: translate(-50%, -50%) !important;
+  aspect-ratio: calc(var(--map-cols) / var(--map-rows)) !important;
+}
+
+@media (max-width: 1024px) and (orientation: portrait) {
+  body[data-mobile="true"] #map-canvas {
+    width: min(100vw, calc(var(--app-vh, 100dvh) * 0.95)) !important;
+    height: min(var(--app-vh, 100dvh), calc(100vw * 0.95)) !important;
+    aspect-ratio: 1 / 1 !important;
+  }
+}
+
+@media (max-width: 1024px) and (orientation: landscape) {
+  body[data-mobile="true"] #status-panel {
+    bottom: 10px;
+    left: 10px;
+  }
+
+  body[data-mobile="true"] #core-status-row,
+  body[data-mobile="true"] #meta-stack {
+    max-width: min(56vw, 320px);
+  }
+}
