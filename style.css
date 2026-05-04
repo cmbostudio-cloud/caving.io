@@ -1694,8 +1694,8 @@ body {
   flex-direction: column;
   gap: 6px;
   margin: 0;
-  width: min(25vw, 320px);
-  min-width: 220px;
+  width: min(12.5vw, 160px);
+  min-width: 110px;
   padding: 0;
   margin-left: 0;
   margin-right: 0;
