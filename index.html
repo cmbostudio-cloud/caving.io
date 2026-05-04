@@ -26,13 +26,6 @@
     </div>
   </div>
 
-  <div id="title-bar">
-    <div class="title-text">caving<span>.io</span></div>
-    <div class="title-actions">
-      <button id="install-btn" type="button" onclick="installGame()" hidden data-i18n="install">INSTALL</button>
-      <button id="settings-btn" type="button" onclick="toggleSettings()" aria-expanded="false" data-i18n="settingsShort">SET</button>
-    </div>
-  </div>
 
   <!-- Settings Overlay (game.js의 toggleSettings()가 참조) -->
   <div id="settings-overlay" hidden>
@@ -98,7 +91,7 @@
   <div id="main-layout">
 
     <div class="panel" id="map-panel">
-      <div class="panel-title" id="map-title">FOREST MAP</div>
+      <div id="map-title" hidden aria-hidden="true"></div>
       <div id="map-canvas"></div>
       <canvas id="mini-map" width="88" height="88" aria-label="Mini map"></canvas>
       <button id="return-link" type="button" data-i18n="return" onclick="tryReturn()">RETURN (R)</button>
@@ -112,10 +105,7 @@
         </div>
       </div>
 
-      <div class="hud-box" id="stats-panel">
-        <div class="panel-title">INFO</div>
-        <div id="selection-info">NO TILE SELECTED</div>
-      </div>
+      <div id="stats-panel" hidden aria-hidden="true"><div id="selection-info"></div></div>
 
       <div id="status-panel">
         <div id="core-status-row">
@@ -132,17 +122,19 @@
             <div class="bar-wrap"><div class="bar-fill bar-xp" id="xp-bar" style="width:0%"></div></div>
           </div>
         </div>
-        <div class="meta-row"><span data-i18n="level">LEVEL</span><span id="lv-val">1</span></div>
-        <div class="meta-row"><span data-i18n="power">POWER</span><span id="pick-val">Wood Lv.1</span></div>
-        <div class="meta-row"><span data-i18n="area">AREA</span><span id="depth-val">FOREST</span></div>
-        <div class="meta-row"><span data-i18n="gold">GOLD</span><span id="gold-val">0</span></div>
+        <div id="meta-stack">
+          <div class="meta-row"><span data-i18n="level">LEVEL</span><span id="lv-val">1</span></div>
+          <div class="meta-row"><span data-i18n="power">POWER</span><span id="pick-val">Wood Lv.1</span></div>
+          <div class="meta-row"><span data-i18n="area">AREA</span><span id="depth-val">FOREST</span></div>
+          <div class="meta-row"><span data-i18n="gold">GOLD</span><span id="gold-val">0</span></div>
+        </div>
       </div>
     </div>
 
   </div>
-</div>
 
-  <script src="game.js"></script>
+  <button id="settings-btn" class="floating-settings" type="button" onclick="toggleSettings()" aria-expanded="false" data-i18n="settings">SETTINGS</button>
+<script src="game.js"></script>
   <script src="pwa.js"></script>
 </body>
 
