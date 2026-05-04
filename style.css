@@ -1667,7 +1667,7 @@ body {
 }
 
 #core-status-row {
-  display: flex;
+  display: none;
   flex-direction: column;
   gap: 6px;
   margin: 0;
@@ -1676,6 +1676,10 @@ body {
   padding: 0;
   margin-left: 0;
   margin-right: 0;
+}
+
+#core-status-row.open {
+  display: flex;
 }
 
 .status-item { padding: 6px 10px; width: 100%; border-left: 0; border-right: 0; }
@@ -1688,7 +1692,9 @@ body {
   font-size: 14px;
 }
 
-#meta-stack { display: flex; flex-direction: column; gap: 4px; width: min(25vw, 320px); min-width: 220px; margin: 0; }
+#meta-stack { display: none; flex-direction: column; gap: 4px; width: min(25vw, 320px); min-width: 220px; margin: 0; }
+
+#meta-stack.open { display: flex; }
 
 .alloc-row,
 .alloc-plus {
