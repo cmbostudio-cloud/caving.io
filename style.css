@@ -1550,10 +1550,9 @@ body {
 #map-canvas {
   position: absolute;
   inset: 0;
-  margin: auto;
-  width: min(100vw, calc(100vh * 16 / 9));
-  height: min(100vh, calc(100vw * 9 / 16));
-  aspect-ratio: 16 / 9;
+  width: 100vw;
+  height: 100vh;
+  aspect-ratio: 9 / 16;
   border: 0;
 }
 
@@ -1599,10 +1598,10 @@ body {
   width: auto;
   padding: 0 14px;
   display: grid;
-  grid-template-columns: minmax(240px, 42vw) minmax(220px, 34vw);
+  grid-template-columns: minmax(240px, 42vw) minmax(260px, 34vw);
   justify-content: space-between;
   align-items: end;
-  gap: 12px;
+  gap: 16px;
 }
 
 #core-status-row {
@@ -1615,7 +1614,11 @@ body {
 .status-item { padding: 6px 8px; }
 
 .meta-row {
-  justify-content: flex-end;
-  gap: 20px;
+  justify-content: space-between;
+  gap: 24px;
   padding: 4px 0;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  font-size: 14px;
 }
+
+#meta-stack { display: flex; flex-direction: column; gap: 6px; }
