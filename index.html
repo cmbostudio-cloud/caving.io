@@ -88,6 +88,16 @@
     </div>
   </div>
 
+  <div id="shop-overlay" hidden>
+    <div id="shop-window">
+      <div class="modal-head crafting-head">
+        <div class="panel-title">SHOP</div>
+        <button class="modal-close" type="button" onclick="toggleShop(false)">✕</button>
+      </div>
+      <div class="shop-empty">EMPTY</div>
+    </div>
+  </div>
+
   <div id="main-layout">
 
     <div class="panel" id="map-panel">
@@ -135,6 +145,7 @@
   </div>
 
   <button id="settings-btn" class="floating-settings" type="button" onclick="toggleSettings()" aria-expanded="false" data-i18n="settings">SETTINGS</button>
+<script src="js/bootstrap.js"></script>
 <script src="game.js"></script>
   <script src="pwa.js"></script>
 </body>
