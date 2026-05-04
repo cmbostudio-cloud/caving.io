@@ -1563,8 +1563,8 @@ body {
 #alloc-panel {
   top: 18px;
   left: 18px;
-  width: min(25vw, 320px);
-  min-width: 220px;
+  width: min(12.5vw, 160px);
+  min-width: 110px;
   padding: 0;
   border: 0;
   background: transparent;
