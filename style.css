@@ -1810,3 +1810,73 @@ body[data-mobile="true"] #map-canvas {
     max-width: min(56vw, 320px);
   }
 }
+
+
+/* Dedicated compact mobile HUD to prevent oversize/offscreen UI and page scrolling */
+body[data-mobile="true"] {
+  width: 100%;
+  height: var(--app-vh, 100dvh);
+  min-height: var(--app-vh, 100dvh);
+  overflow: hidden !important;
+  position: fixed;
+  inset: 0;
+}
+
+body[data-mobile="true"] #main-layout,
+body[data-mobile="true"] #map-panel {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body[data-mobile="true"] #alloc-panel {
+  left: max(8px, env(safe-area-inset-left)) !important;
+  top: max(8px, env(safe-area-inset-top)) !important;
+  width: clamp(92px, 26vw, 124px) !important;
+  min-width: 92px !important;
+  max-width: 124px !important;
+  padding: 0 !important;
+}
+
+body[data-mobile="true"] #alloc-toggle {
+  font-size: 10px;
+  letter-spacing: 0.03em;
+  padding-bottom: 5px;
+  margin-bottom: 5px;
+}
+
+body[data-mobile="true"] #alloc-panel .alloc-row {
+  font-size: 10px;
+  padding: 5px 6px;
+}
+
+body[data-mobile="true"] #alloc-panel .alloc-plus {
+  min-width: 24px;
+  padding: 0 5px;
+  font-size: 10px;
+}
+
+body[data-mobile="true"] #status-panel {
+  left: max(8px, env(safe-area-inset-left)) !important;
+  right: auto !important;
+  bottom: max(8px, env(safe-area-inset-bottom)) !important;
+  width: min(46vw, 220px);
+  max-width: 220px;
+}
+
+body[data-mobile="true"] #core-status-row,
+body[data-mobile="true"] #meta-stack {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+body[data-mobile="true"] #mini-map {
+  top: max(8px, env(safe-area-inset-top));
+  right: max(8px, env(safe-area-inset-right));
+}
+
+body[data-mobile="true"] #return-link {
+  top: calc(max(8px, env(safe-area-inset-top)) + 84px);
+  right: max(8px, env(safe-area-inset-right));
+}
