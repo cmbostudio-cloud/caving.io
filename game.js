@@ -1,8 +1,11 @@
 // Core gameplay logic (split from bootstrap.js)
 
-function syncViewportHeight() {
-  const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+function syncViewportMetrics() {
+  const viewport = window.visualViewport;
+  const vh = viewport ? viewport.height : window.innerHeight;
+  const vw = viewport ? viewport.width : window.innerWidth;
   document.documentElement.style.setProperty('--app-vh', `${vh}px`);
+  document.documentElement.style.setProperty('--app-vw', `${vw}px`);
 }
 
 function syncMobileLayoutMode() {
@@ -11,12 +14,14 @@ function syncMobileLayoutMode() {
   document.body.dataset.mobile = coarsePointer || narrowViewport ? 'true' : 'false';
 }
 
-window.addEventListener('resize', syncViewportHeight, { passive: true });
+window.addEventListener('resize', syncViewportMetrics, { passive: true });
 window.addEventListener('resize', syncMobileLayoutMode, { passive: true });
+window.addEventListener('orientationchange', syncViewportMetrics, { passive: true });
+window.addEventListener('orientationchange', syncMobileLayoutMode, { passive: true });
 if (window.visualViewport) {
-  window.visualViewport.addEventListener('resize', syncViewportHeight, { passive: true });
+  window.visualViewport.addEventListener('resize', syncViewportMetrics, { passive: true });
 }
-syncViewportHeight();
+syncViewportMetrics();
 syncMobileLayoutMode();
 
 applyLayoutMode(SETTINGS.layoutMode);
