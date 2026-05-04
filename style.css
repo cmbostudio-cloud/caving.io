@@ -1552,10 +1552,9 @@ body {
   left: 0;
   right: 0;
   top: 0;
-  margin: 0 auto;
   width: 100vw;
-  height: min(100vh, calc(100vw * 9 / 16));
-  aspect-ratio: 16 / 9;
+  height: 100vh;
+  aspect-ratio: auto;
   border: 0;
 }
 
@@ -1595,25 +1594,26 @@ body {
 
 #status-panel {
   left: 0;
-  right: 0;
-  bottom: 0;
+  right: auto;
+  bottom: 12px;
   transform: none;
-  width: 100vw;
+  width: auto;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 #core-status-row {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   margin: 0;
-  width: min(88vw, 1100px);
+  width: min(25vw, 320px);
+  min-width: 220px;
   padding: 0;
-  margin-left: auto;
-  margin-right: auto;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .status-item { padding: 6px 10px; width: 100%; border-left: 0; border-right: 0; }
@@ -1626,4 +1626,4 @@ body {
   font-size: 14px;
 }
 
-#meta-stack { display: flex; flex-direction: column; gap: 4px; width: min(86vw, 980px); margin: 0 auto 8px; }
+#meta-stack { display: flex; flex-direction: column; gap: 4px; width: min(25vw, 320px); min-width: 220px; margin: 0; }
