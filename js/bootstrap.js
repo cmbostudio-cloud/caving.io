@@ -295,12 +295,14 @@ function updateStatusToggleLabel(isOpen) {
 function toggleStatusPanel(forceOpen) {
   const core = document.getElementById('core-status-row');
   const meta = document.getElementById('meta-stack');
+  const panel = document.getElementById('status-panel');
   const toggle = document.getElementById('status-toggle');
-  if (!core || !meta || !toggle) return;
+  if (!core || !meta || !toggle || !panel) return;
   const isOpen = core.classList.contains('open');
   const willOpen = typeof forceOpen === 'boolean' ? forceOpen : !isOpen;
   core.classList.toggle('open', willOpen);
   meta.classList.toggle('open', willOpen);
+  panel.dataset.expanded = willOpen ? 'true' : 'false';
   toggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
   updateStatusToggleLabel(willOpen);
 }
@@ -311,4 +313,3 @@ function setMinimapEnabled(enabled) {
   applyLanguage();
   if (G.map) render();
 }
-
