@@ -1580,8 +1580,12 @@ body {
 
 #stat-alloc-list {
   margin-top: 8px;
-  display: grid;
+  display: none;
   gap: 6px;
+}
+
+#stat-alloc-list.open {
+  display: grid;
 }
 
 #alloc-panel .alloc-row {
@@ -1620,6 +1624,34 @@ body {
   bottom: 14px;
   z-index: 20;
   background: rgba(0,0,0,0.75);
+}
+
+
+
+#status-toggle {
+  width: 100%;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+  color: var(--bright);
+}
+
+#core-status-row,
+#meta-stack {
+  display: none;
+}
+
+#core-status-row.open {
+  display: flex;
+}
+
+#meta-stack.open {
+  display: flex;
+}
+
+#map-canvas .tile-glyph,
+#map-canvas .terrain-underlay {
+  font-size: 1.05em;
 }
 
 #status-panel {
