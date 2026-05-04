@@ -385,13 +385,16 @@ function generateForestMap() {
     }
   }
 
-  carveLine(map, FOREST_POINTS.spawn, FOREST_POINTS.mine, 'grass');
+  for (let x = 1; x < MAP_W - 1; x++) {
+    setCell(map, x, MAP_MID_Y, { type: 'trail' });
+  }
+  carveLine(map, FOREST_POINTS.spawn, FOREST_POINTS.mine, 'trail');
   setCell(map, FOREST_POINTS.plazaExit.x, FOREST_POINTS.plazaExit.y, { type: 'plazaExit' });
-  setCell(map, FOREST_POINTS.spawn.x, FOREST_POINTS.spawn.y, { type: 'grass' });
+  setCell(map, FOREST_POINTS.spawn.x, FOREST_POINTS.spawn.y, { type: 'trail' });
 
   for (let dy = -2; dy <= 2; dy++) {
     for (let dx = -2; dx <= 2; dx++) {
-      setCell(map, FOREST_POINTS.mine.x + dx, FOREST_POINTS.mine.y + dy, { type: 'grass' });
+      setCell(map, FOREST_POINTS.mine.x + dx, FOREST_POINTS.mine.y + dy, { type: 'trail' });
     }
   }
   setCell(map, FOREST_POINTS.mine.x, FOREST_POINTS.mine.y, { type: 'mineEntrance' });
@@ -599,6 +602,8 @@ function cellGlyph(cell, isPlayer) {
       return { ch: '>', fg: '#ff9800', weight: 'bold' };
     case 'grass':
       return { ch: '.', fg: '#1f5f2c', weight: 'normal' };
+    case 'trail':
+      return { ch: '.', fg: '#c17c38', weight: 'normal' };
     case 'tree':
       return { ch: 'T', fg: '#4caf50', weight: 'bold' };
     case 'flower':
@@ -630,6 +635,7 @@ function tileLabel(cell, isPlayer, x, y) {
   if (cell.type === 'floor') return `${t('floor')} ${x}, ${y}`;
   if (cell.type === 'stairs') return `${t('stairs')} ${x}, ${y}`;
   if (cell.type === 'grass') return `${t('grass')} ${x}, ${y}`;
+  if (cell.type === 'trail') return `Trail ${x}, ${y}`;
   if (cell.type === 'tree') return `${t('tree')} ${x}, ${y}`;
   if (cell.type === 'flower') return `${t('flower')} ${x}, ${y}`;
   if (cell.type === 'mineEntrance') return `${t('mineEntrance')} ${x}, ${y}`;
@@ -643,7 +649,7 @@ function tileLabel(cell, isPlayer, x, y) {
 }
 
 function isWalkableCell(cell) {
-  return ['floor', 'stairs', 'grass', 'flower', 'mineEntrance', 'shop', 'shopExit', 'forestGate', 'plazaExit', 'academy'].includes(cell.type);
+  return ['floor', 'stairs', 'grass', 'trail', 'flower', 'mineEntrance', 'shop', 'shopExit', 'forestGate', 'plazaExit', 'academy'].includes(cell.type);
 }
 
 function isPortalCell(cell) {
@@ -736,6 +742,7 @@ function minimapColor(cell) {
   if (cell.type === 'ore') return '#6f8a96';
   if (cell.type === 'floor') return '#404040';
   if (cell.type === 'grass') return '#22542a';
+  if (cell.type === 'trail') return '#c17c38';
   if (cell.type === 'tree') return '#2e7d32';
   if (cell.type === 'flower') return '#e5dc54';
   if (cell.type === 'stairs') return '#ff9800';
@@ -788,7 +795,7 @@ function tryStairs() {
   } else if (cell.type === 'plazaExit') {
     enterPlaza('forest');
   } else if (cell.type === 'shop') {
-    enterShop();
+    toggleShop(true);
   } else if (cell.type === 'shopExit') {
     enterPlaza('shop');
   } else if (cell.type === 'academy') {
@@ -796,6 +803,13 @@ function tryStairs() {
   } else {
     log(t('noEntrance'), 'sys');
   }
+}
+
+function toggleShop(forceOpen) {
+  const overlay = document.getElementById('shop-overlay');
+  if (!overlay) return;
+  const willOpen = typeof forceOpen === 'boolean' ? forceOpen : overlay.hasAttribute('hidden');
+  overlay.hidden = !willOpen;
 }
 
 function tryReturn() {

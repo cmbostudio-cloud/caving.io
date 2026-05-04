@@ -141,7 +141,8 @@ body {
 
 #settings-overlay,
 #exchange-overlay,
-#crafting-overlay {
+#crafting-overlay,
+#shop-overlay {
   position: fixed;
   inset: 0;
   z-index: 92;
@@ -154,7 +155,8 @@ body {
 
 #settings-overlay[hidden],
 #exchange-overlay[hidden],
-#crafting-overlay[hidden] {
+#crafting-overlay[hidden],
+#shop-overlay[hidden] {
   display: none;
 }
 
@@ -412,6 +414,10 @@ body[data-layout="square"] #map-canvas {
   background: rgba(76, 175, 80, 0.04);
 }
 
+.tile-trail {
+  background: rgba(193, 124, 56, 0.22);
+}
+
 .tile-mineEntrance,
 .tile-shop,
 .tile-exchange,
@@ -428,6 +434,7 @@ body[data-layout="square"] #map-canvas {
 #map-canvas.area-mine .tile-wall { background: rgba(18,18,18,0.5); }
 #map-canvas.area-plaza .tile-floor { background: rgba(58,54,40,0.15); }
 #map-canvas.area-plaza .tile-wall { background: rgba(22,20,16,0.45); }
+#map-canvas.area-forest .tile-trail { background: rgba(193,124,56,0.28); }
 
 
 .tile-ore-hp {

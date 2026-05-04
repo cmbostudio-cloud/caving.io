@@ -21,7 +21,7 @@ const TILES = {
 const FOREST_POINTS = {
   spawn: { x: 1, y: MAP_MID_Y },
   plazaExit: { x: 0, y: MAP_MID_Y },
-  mine: { x: MAP_W - 7, y: MAP_MID_Y },
+  mine: { x: 10, y: MAP_MID_Y - 4 },
 };
 
 const PLAZA_POINTS = {
@@ -311,5 +311,4 @@ function setMinimapEnabled(enabled) {
   applyLanguage();
   if (G.map) render();
 }
-
 
