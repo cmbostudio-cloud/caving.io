@@ -194,10 +194,10 @@ function loadSettings() {
       layoutMode: saved.layoutMode === 'square' ? 'square' : 'classic',
       language: saved.language === 'ko' ? 'ko' : 'en',
       minimapEnabled: saved.minimapEnabled !== false,
-      themeMode: saved.themeMode === 'light' ? 'light' : 'dark',
+      themeMode: resolveThemeMode(saved.themeMode ?? saved.theme),
     };
   } catch {
-    return { layoutMode: 'classic', language: 'en', minimapEnabled: true, themeMode: 'dark' };
+    return { layoutMode: 'classic', language: 'en', minimapEnabled: true, themeMode: resolveThemeMode() };
   }
 }
 
@@ -209,6 +209,21 @@ function saveSettings() {
   }
 }
 
+
+function resolveThemeMode(value) {
+  return value === 'light' ? 'light' : 'dark';
+}
+
+function applyThemeMode(mode) {
+  const themeMode = resolveThemeMode(mode);
+  document.body.dataset.theme = themeMode;
+  document.documentElement.style.colorScheme = themeMode;
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeMeta) themeMeta.setAttribute('content', themeMode === 'light' ? '#f4f4f4' : '#0a0a0a');
+  document.querySelectorAll('[data-theme-option]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.themeOption === themeMode);
+  });
+}
 function applyLayoutMode(mode) {
   const layoutMode = mode === 'square' ? 'square' : 'classic';
   document.body.dataset.layout = layoutMode;
@@ -230,9 +245,7 @@ function applyLanguage() {
     const enabled = SETTINGS.minimapEnabled !== false;
     btn.classList.toggle('active', (btn.dataset.minimapOption === 'on') === enabled);
   });
-  document.querySelectorAll('[data-theme-option]').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.themeOption === (SETTINGS.themeMode || 'dark'));
-  });
+  applyThemeMode(SETTINGS.themeMode);
   const upgradeLabelKey = {
     damage: 'upgradeDamage',
     gold_mult: 'upgradeGoldMult',
@@ -261,12 +274,27 @@ function setLanguage(language) {
 }
 
 function setThemeMode(mode) {
-  SETTINGS.themeMode = mode === 'light' ? 'light' : 'dark';
-  document.body.dataset.theme = SETTINGS.themeMode;
+  SETTINGS.themeMode = resolveThemeMode(mode);
   saveSettings();
-  applyLanguage();
+  applyThemeMode(SETTINGS.themeMode);
 }
 
+
+
+window.addEventListener('pageshow', () => {
+  SETTINGS = loadSettings();
+  applyThemeMode(SETTINGS.themeMode);
+  applyLayoutMode(SETTINGS.layoutMode);
+  applyLanguage();
+});
+
+window.addEventListener('storage', e => {
+  if (e.key !== SETTINGS_KEY) return;
+  SETTINGS = loadSettings();
+  applyThemeMode(SETTINGS.themeMode);
+  applyLayoutMode(SETTINGS.layoutMode);
+  applyLanguage();
+});
 
 function updateStatToggleLabel(isOpen) {
   const toggle = document.getElementById('alloc-toggle');

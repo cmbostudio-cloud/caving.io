@@ -25,7 +25,7 @@ syncViewportMetrics();
 syncMobileLayoutMode();
 
 applyLayoutMode(SETTINGS.layoutMode);
-document.body.dataset.theme = SETTINGS.themeMode || 'dark';
+applyThemeMode(SETTINGS.themeMode);
 applyLanguage();
 toggleStatusPanel(true);
 
