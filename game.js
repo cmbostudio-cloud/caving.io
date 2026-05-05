@@ -165,6 +165,11 @@ function floodFill(map, sx, sy) {
 
 function newFloor() {
   stopAutoMove();
+  if (G.depth > 10) {
+    G.depth = 10;
+    log('B10F is the deepest floor.', 'sys');
+    return;
+  }
   G.area = 'mine';
   G.map = generateMap(G.depth);
   G.px = 2;
@@ -379,10 +384,8 @@ function generatePlazaMap() {
   }
 
   setCell(map, PLAZA_POINTS.shop.x, PLAZA_POINTS.shop.y, { type: 'shop' });
-  setCell(map, PLAZA_POINTS.academy.x, PLAZA_POINTS.academy.y, { type: 'academy' });
   setCell(map, PLAZA_POINTS.forestGate.x, PLAZA_POINTS.forestGate.y, { type: 'forestGate' });
   setCell(map, PLAZA_POINTS.forestReturn.x, PLAZA_POINTS.forestReturn.y, { type: 'floor' });
-  migrateWorkbenchInMap(map);
   return map;
 }
 
@@ -511,16 +514,6 @@ function selectedTile() {
 }
 
 // ---- MAP HELPERS ----
-function migrateWorkbenchInMap(map) {
-  if (!Array.isArray(map)) return;
-  for (let y = 0; y < MAP_H; y++) {
-    for (let x = 0; x < MAP_W; x++) {
-      if (map[y]?.[x]?.type === 'anvil') map[y][x] = { type: 'academy' };
-    }
-  }
-}
-
-
 function placeReachableStairs() {
   const visited = floodFill(G.map, G.px, G.py);
   const candidates = [];
@@ -543,8 +536,8 @@ function initGame() {
     xp: 0, xpNext: 100,
     level: 1,
     attackDamage: 1,
-    attackSpeed: 1,
     goldMult: 1,
+    stamRegen: 1,
     statPoints: 0,
     gold: 0,
     map: null,
@@ -569,7 +562,6 @@ function enterPlaza(entry = 'start') {
   stopAutoMove();
   G.area = 'plaza';
   if (!G.plazaMap) G.plazaMap = generatePlazaMap();
-  migrateWorkbenchInMap(G.plazaMap);
   G.map = G.plazaMap;
   G.selected = null;
 
@@ -631,8 +623,6 @@ function cellGlyph(cell, isPlayer) {
       return { ch: '$', fg: '#ffd700', weight: 'bold' };
     case 'shopExit':
       return { ch: '<', fg: '#ff9800', weight: 'bold' };
-    case 'academy':
-      return { ch: 'W', fg: '#8d6e63', weight: 'bold' };
     case 'ore': {
       const ore = ORE_BY_ID[cell.ore];
       return { ch: ore.ch, fg: ore.fg, weight: 'normal' };
@@ -656,17 +646,16 @@ function tileLabel(cell, isPlayer, x, y) {
   if (cell.type === 'plazaExit') return `${t('plazaExit')} ${x}, ${y}`;
   if (cell.type === 'shop') return `${t('shop')} ${x}, ${y}`;
   if (cell.type === 'shopExit') return `${t('shopExit')} ${x}, ${y}`;
-  if (cell.type === 'academy') return `${t('academy')} ${x}, ${y}`;
   if (cell.type === 'ore') return `${oreName(ORE_BY_ID[cell.ore])} ${x}, ${y}`;
   return `${x}, ${y}`;
 }
 
 function isWalkableCell(cell) {
-  return ['floor', 'stairs', 'grass', 'trail', 'flower', 'mineEntrance', 'shop', 'shopExit', 'forestGate', 'plazaExit', 'academy'].includes(cell.type);
+  return ['floor', 'stairs', 'grass', 'trail', 'flower', 'mineEntrance', 'shop', 'shopExit', 'forestGate', 'plazaExit'].includes(cell.type);
 }
 
 function isPortalCell(cell) {
-  return ['stairs', 'mineEntrance', 'shop', 'shopExit', 'forestGate', 'plazaExit', 'academy'].includes(cell.type);
+  return ['stairs', 'mineEntrance', 'shop', 'shopExit', 'forestGate', 'plazaExit'].includes(cell.type);
 }
 
 function areaLabel() {
@@ -748,7 +737,7 @@ function render() {
   UI.stamVal().textContent = `${G.stam} / ${G.stamMax}`;
   UI.xpVal().textContent = `${G.xp} / ${G.xpNext}`;
   UI.lvVal().textContent = G.level;
-  UI.pickVal().textContent = `DMG ${G.attackDamage.toFixed(1)} / ASPD ${G.attackSpeed.toFixed(1)} / GOLD x${G.goldMult.toFixed(1)}`;
+  UI.pickVal().textContent = `DMG ${G.attackDamage.toFixed(1)} / GOLD x${G.goldMult.toFixed(1)}`;
   UI.depthVal().textContent = areaLabel();
   UI.goldVal().textContent = G.gold || 0;
   const sp = UI.statPointsVal();
@@ -779,7 +768,7 @@ function minimapColor(cell) {
   if (cell.type === 'stairs') return '#ff9800';
   if (cell.type === 'mineEntrance') return '#ff9800';
   if (cell.type === 'forestGate' || cell.type === 'plazaExit' || cell.type === 'shopExit') return '#ff9800';
-  if (cell.type === 'shop' || cell.type === 'academy') return '#ffd700';
+  if (cell.type === 'shop') return '#ffd700';
   return '#505050';
 }
 
@@ -816,6 +805,10 @@ function tryStairs() {
   stopAutoMove();
   const cell = G.map[G.py][G.px];
   if (cell.type === 'stairs') {
+    if (G.depth >= 10) {
+      log('B10F is the deepest floor.', 'sys');
+      return;
+    }
     G.depth++;
     log(t('goingDown', G.depth), 'info');
     newFloor();
@@ -830,8 +823,6 @@ function tryStairs() {
     toggleShop(true);
   } else if (cell.type === 'shopExit') {
     enterPlaza('shop');
-  } else if (cell.type === 'academy') {
-    toggleCrafting(true);
   } else {
     log(t('noEntrance'), 'sys');
   }
@@ -913,7 +904,7 @@ function mineCell(tx, ty) {
 
   if (cell.type === 'ore') {
     const ore = ORE_BY_ID[cell.ore];
-    const stamCost = Math.max(1, Math.round(6 - G.attackSpeed));
+    const stamCost = 5;
     if (G.stam < stamCost) {
       log(t('lowStaminaMine'), 'warn');
       return;
@@ -922,7 +913,7 @@ function mineCell(tx, ty) {
     const nextHp = Math.max(0, (cell.hp ?? ore.hardness) - G.attackDamage);
     if (nextHp > 0) {
       G.map[ty][tx] = { ...cell, hp: nextHp, maxHp: cell.maxHp ?? ore.hardness };
-      tick(Math.max(1, Math.round(3 - G.attackSpeed)));
+      tick(2);
       render();
       return;
     }
@@ -935,7 +926,7 @@ function mineCell(tx, ty) {
     log(`${t('oreGained', oreName(ore), amount, xpGain)} (+${goldGain}G)`, 'ok');
 
     checkLevelUp();
-    tick(Math.max(1, Math.round(3 - G.attackSpeed)));
+    tick(2);
     render();
   }
 }
@@ -996,9 +987,6 @@ function toggleSettings(forceOpen) {
   const button = document.getElementById('settings-btn');
   if (!overlay) return;
   const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : overlay.hasAttribute('hidden');
-  if (shouldOpen) {
-    toggleCrafting(false);
-  }
   overlay.toggleAttribute('hidden', !shouldOpen);
   if (button) button.setAttribute('aria-expanded', String(shouldOpen));
 }
@@ -1008,15 +996,13 @@ function toggleSettings(forceOpen) {
 
 
 
-function toggleCrafting(forceOpen) {
-  const overlay = document.getElementById('crafting-overlay');
-  if (!overlay) return;
-  const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : overlay.hasAttribute('hidden');
-  overlay.toggleAttribute('hidden', !shouldOpen);
-}
-
 function craftPickaxe(id) {
-  const cfg = { damage:{cost:100, apply:()=>G.attackDamage=Number((G.attackDamage+0.2).toFixed(1))}, attack_speed:{cost:150, apply:()=>G.attackSpeed=Number((G.attackSpeed+0.2).toFixed(1))}, gold_mult:{cost:180, apply:()=>G.goldMult=Number((G.goldMult+0.2).toFixed(1))} };
+  const cfg = {
+    damage: { cost: 100, apply: () => { G.attackDamage = Number((G.attackDamage + 0.2).toFixed(1)); } },
+    gold_mult: { cost: 180, apply: () => { G.goldMult = Number((G.goldMult + 0.2).toFixed(1)); } },
+    stam_max: { cost: 150, apply: () => { G.stamMax += 10; G.stam = Math.min(G.stamMax, G.stam + 10); } },
+    stam_regen: { cost: 220, apply: () => { G.stamRegen = Number((G.stamRegen + 0.2).toFixed(1)); } },
+  };
   const up = cfg[id];
   if (!up) return;
   if (G.gold < up.cost) { log(t('notEnoughMaterials'), 'warn'); return; }
@@ -1030,7 +1016,6 @@ function allocateStat(stat) {
   if (!G.map || G.gameOver) return;
   if ((G.statPoints || 0) <= 0) return;
   if (stat === 'damage') { G.attackDamage = Number((G.attackDamage + 0.1).toFixed(1)); }
-  else if (stat === 'attack_speed') { G.attackSpeed = Number((G.attackSpeed + 0.1).toFixed(1)); }
   else if (stat === 'gold_mult') { G.goldMult = Number((G.goldMult + 0.1).toFixed(1)); }
   else return;
   G.statPoints -= 1;
@@ -1052,9 +1037,9 @@ function saveGame() {
       xp: G.xp,
       xpNext: G.xpNext,
       level: G.level,
-        attackDamage: G.attackDamage,
-      attackSpeed: G.attackSpeed,
+      attackDamage: G.attackDamage,
       goldMult: G.goldMult,
+      stamRegen: G.stamRegen || 1,
       statPoints: G.statPoints || 0,
       gold: G.gold || 0,
       map: G.map,
@@ -1095,9 +1080,9 @@ function loadGame() {
       xp: saved.xp ?? 0,
       xpNext: saved.xpNext ?? 100,
       level: saved.level ?? 1,
-        attackDamage: Number(saved.attackDamage) || 1,
-      attackSpeed: Number(saved.attackSpeed) || 1,
+      attackDamage: Number(saved.attackDamage) || 1,
       goldMult: Number(saved.goldMult) || 1,
+      stamRegen: Number(saved.stamRegen) || 1,
       statPoints: saved.statPoints ?? 0,
       gold: saved.gold ?? 0,
       map: saved.map,
@@ -1108,8 +1093,6 @@ function loadGame() {
       plazaMap: saved.plazaMap || null,
       forestMap: saved.forestMap || null,
     };
-    migrateWorkbenchInMap(G.plazaMap);
-    migrateWorkbenchInMap(G.map);
     render();
     return true;
   } catch {
@@ -1178,7 +1161,7 @@ function bootGame() {
 
 setInterval(() => {
   if (!G.map || G.gameOver || G.stam >= G.stamMax) return;
-  G.stam = Math.min(G.stamMax, G.stam + 1);
+  G.stam = Math.min(G.stamMax, G.stam + G.stamRegen);
   render();
 }, 1000);
 
@@ -1202,7 +1185,6 @@ document.addEventListener('keydown', e => {
   if (G.gameOver) return;
   if (e.key === 'Escape') {
     toggleSettings(false);
-    toggleCrafting(false);
     return;
   }
   if (e.key === 'e' || e.key === 'E' || e.key === ' ') {
