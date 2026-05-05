@@ -677,7 +677,18 @@ function areaLabel() {
 }
 
 
+function isMobilePortraitViewport() {
+  const viewport = window.visualViewport;
+  const vh = viewport ? viewport.height : window.innerHeight;
+  const vw = viewport ? viewport.width : window.innerWidth;
+  return document.body.dataset.mobile === 'true' && vh >= vw;
+}
+
 function currentViewSize() {
+  if (isMobilePortraitViewport()) {
+    const mobileSquareView = 9;
+    return { cols: mobileSquareView, rows: mobileSquareView };
+  }
   return { cols: VIEW_W, rows: VIEW_H };
 }
 
@@ -793,9 +804,10 @@ function renderMiniMap() {
   ctx.strokeStyle = '#a0a0a0';
   ctx.strokeRect(0, 0, w, h);
   const view = getViewportBounds();
+  const { cols, rows } = currentViewSize();
   ctx.strokeStyle = '#ffeb3b';
   ctx.lineWidth = 1;
-  ctx.strokeRect(view.startX * cw, view.startY * ch, VIEW_W * cw, VIEW_H * ch);
+  ctx.strokeRect(view.startX * cw, view.startY * ch, cols * cw, rows * ch);
   ctx.fillStyle = '#ff4444';
   ctx.fillRect(G.px * cw, G.py * ch, Math.max(2, cw), Math.max(2, ch));
 }
