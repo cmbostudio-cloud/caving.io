@@ -181,6 +181,7 @@ function newFloor() {
   G.selected = null;
   G.map[G.py][G.px].type = 'floor';
   placeReachableStairs();
+  captureEditorSnapshot();
   render();
   log(t('enterFloor', G.depth), 'info');
   if (G.depth > 1) log(t('deeper'), 'sys');
@@ -194,6 +195,7 @@ function enterShop() {
   G.px = SHOP_POINTS.spawn.x;
   G.py = SHOP_POINTS.spawn.y;
   G.selected = null;
+  captureEditorSnapshot();
   render();
   log(t('shopEnter'), 'info');
 }
@@ -257,9 +259,19 @@ function defaultEditorState() {
   return { unlocked: false, enabled: false, brush: 'floor' };
 }
 
+function cloneMapData(map) {
+  return Array.isArray(map) ? map.map(row => row.map(cell => ({ ...cell }))) : null;
+}
+
 function mapEditorState() {
   if (!G.mapEditor) G.mapEditor = defaultEditorState();
   return G.mapEditor;
+}
+
+function captureEditorSnapshot() {
+  const editor = mapEditorState();
+  if (!editor.snapshots) editor.snapshots = {};
+  editor.snapshots[G.area] = cloneMapData(G.map);
 }
 
 function toggleMapEditor(forceEnabled) {
@@ -295,6 +307,22 @@ function paintMapCell(x, y) {
   if (G.area === 'plaza') G.plazaMap = G.map;
   if (G.area === 'forest') G.forestMap = G.map;
   render();
+  return true;
+}
+
+function resetEditedMap() {
+  const editor = mapEditorState();
+  const snapshot = editor.snapshots?.[G.area];
+  if (!snapshot) {
+    log('[MAP EDITOR] 복원할 스냅샷이 없습니다.', 'warn');
+    return false;
+  }
+  G.map = cloneMapData(snapshot);
+  if (G.area === 'plaza') G.plazaMap = G.map;
+  if (G.area === 'forest') G.forestMap = G.map;
+  G.selected = null;
+  render();
+  log('[MAP EDITOR] 현재 지역 편집을 취소했습니다. (0)', 'sys');
   return true;
 }
 
@@ -623,6 +651,7 @@ function enterPlaza(entry = 'start') {
     G.py = PLAZA_POINTS.spawn.y;
   }
 
+  captureEditorSnapshot();
   render();
   log(entry === 'start' ? t('plazaStart') : t('plazaReturn'), 'info');
 }
@@ -640,6 +669,7 @@ function enterForest(entry = 'plaza') {
     G.px = FOREST_POINTS.spawn.x;
     G.py = FOREST_POINTS.spawn.y;
   }
+  captureEditorSnapshot();
   render();
   log(entry === 'return' ? t('forestReturn') : t('forestEnter'), 'info');
 }
@@ -1245,7 +1275,7 @@ document.addEventListener('keydown', e => {
       mapEditorCodeProgress = 0;
       editor.unlocked = true;
       toggleMapEditor(true);
-      log('[MAP EDITOR] 1~9 브러시 선택 / M 토글', 'sys');
+      log('[MAP EDITOR] 1~9 브러시 선택 / M 토글 / 0 취소', 'sys');
       return;
     }
   } else {
@@ -1262,6 +1292,10 @@ document.addEventListener('keydown', e => {
   }
   if (editor.unlocked && editor.enabled && /^[1-9]$/.test(e.key)) {
     setMapEditorBrush(Number(e.key) - 1);
+    return;
+  }
+  if (editor.unlocked && editor.enabled && e.key === '0') {
+    resetEditedMap();
     return;
   }
   if (e.key === 'e' || e.key === 'E' || e.key === ' ') {
