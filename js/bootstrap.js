@@ -89,7 +89,7 @@ const I18N = {
     loading: 'LOADING', settings: 'SETTINGS', settingsShort: 'SET', install: 'INSTALL', layout: 'LAYOUT', classic: 'CLASSIC', square: 'SQUARE', saveLoad: 'SAVE/LOAD',
     miniMap: 'MINIMAP', on: 'ON', off: 'OFF', theme: 'THEME', dark: 'DARK', light: 'LIGHT',
     language: 'LANGUAGE', status: 'STATUS', statusPanel: 'STATUS', hp: 'HP', stamina: 'STAMINA', exp: 'EXP', level: 'LEVEL',
-    power: 'POWER', area: 'AREA', gold: 'GOLD', statPoints: 'STAT POINTS', points: 'POINTS', statDamage: 'Damage Up', statAttackSpeed: 'Attack Speed Up', statGoldMult: 'Gold Rate Up', upgradeDamage: 'Damage Upgrade (100G)', upgradeGoldMult: 'Gold Gain Upgrade (180G)', upgradeAttackSpeed: 'Attack Speed Upgrade (150G)', inventory: 'INVENTORY', inventoryButton: 'INVENTORY (I)', saveButton: 'SAVE (K)', loadButton: 'LOAD (L)', materials: 'MATERIALS', action: 'ACTION',
+    power: 'POWER', area: 'AREA', gold: 'GOLD', statPoints: 'STAT POINTS', points: 'POINTS', statDamage: 'Damage Up', statGoldMult: 'Gold Rate Up', upgradeDamage: 'Damage Upgrade (100G)', upgradeGoldMult: 'Gold Gain Upgrade (180G)', inventory: 'INVENTORY', inventoryButton: 'INVENTORY (I)', saveButton: 'SAVE (K)', loadButton: 'LOAD (L)', materials: 'MATERIALS', action: 'ACTION',
     use: 'USE', mine: 'MINE', return: 'RETURN (R)', rest: 'REST', log: 'LOG',
     noSelection: 'NO TILE SELECTED', moving: 'MOVING', select: 'SELECT', enter: 'ENTER', move: 'MOVE',
     player: 'Player', wall: 'Wall', floor: 'Floor', stairs: 'Stairs', grass: 'Grass', tree: 'Tree',
@@ -128,7 +128,7 @@ const I18N = {
     loading: '로딩 중', settings: '설정', settingsShort: '설정', install: '설치', layout: '배치', classic: '기본', square: '정사각', saveLoad: '저장/불러오기',
     miniMap: '미니맵', on: '켜기', off: '끄기', theme: '테마', dark: '다크', light: '라이트',
     language: '언어', status: '상태', statusPanel: '상태', hp: '체력', stamina: '스태미나', exp: '경험치', level: '레벨',
-    power: '능력', area: '지역', gold: '골드', statPoints: '스탯 포인트', points: '포인트', statDamage: '데미지 증가', statAttackSpeed: '공격 속도 증가', statGoldMult: '획득 골드 비율 증가', upgradeDamage: '데미지 강화 (100G)', upgradeGoldMult: '획득 골드 강화 (180G)', upgradeAttackSpeed: '공격 속도 강화 (150G)', inventory: '인벤토리', inventoryButton: '인벤토리 (I)', saveButton: '저장 (K)', loadButton: '불러오기 (L)', materials: '재료', action: '행동',
+    power: '능력', area: '지역', gold: '골드', statPoints: '스탯 포인트', points: '포인트', statDamage: '데미지 증가', statGoldMult: '획득 골드 비율 증가', upgradeDamage: '데미지 강화 (100G)', upgradeGoldMult: '획득 골드 강화 (180G)', inventory: '인벤토리', inventoryButton: '인벤토리 (I)', saveButton: '저장 (K)', loadButton: '불러오기 (L)', materials: '재료', action: '행동',
     use: '사용', mine: '채굴', return: '귀환 (R)', rest: '휴식', log: '기록',
     noSelection: '선택한 타일 없음', moving: '이동 중', select: '선택', enter: '입장', move: '이동',
     player: '플레이어', wall: '벽', floor: '바닥', stairs: '계단', grass: '풀', tree: '나무',
@@ -249,7 +249,6 @@ function applyLanguage() {
   const upgradeLabelKey = {
     damage: 'upgradeDamage',
     gold_mult: 'upgradeGoldMult',
-    attack_speed: 'upgradeAttackSpeed',
   };
   document.querySelectorAll('[data-upgrade]').forEach(btn => {
     const key = upgradeLabelKey[btn.dataset.upgrade];

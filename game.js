@@ -543,7 +543,6 @@ function initGame() {
     xp: 0, xpNext: 100,
     level: 1,
     attackDamage: 1,
-    attackSpeed: 1,
     goldMult: 1,
     statPoints: 0,
     gold: 0,
@@ -748,7 +747,7 @@ function render() {
   UI.stamVal().textContent = `${G.stam} / ${G.stamMax}`;
   UI.xpVal().textContent = `${G.xp} / ${G.xpNext}`;
   UI.lvVal().textContent = G.level;
-  UI.pickVal().textContent = `DMG ${G.attackDamage.toFixed(1)} / ASPD ${G.attackSpeed.toFixed(1)} / GOLD x${G.goldMult.toFixed(1)}`;
+  UI.pickVal().textContent = `DMG ${G.attackDamage.toFixed(1)} / GOLD x${G.goldMult.toFixed(1)}`;
   UI.depthVal().textContent = areaLabel();
   UI.goldVal().textContent = G.gold || 0;
   const sp = UI.statPointsVal();
@@ -913,7 +912,7 @@ function mineCell(tx, ty) {
 
   if (cell.type === 'ore') {
     const ore = ORE_BY_ID[cell.ore];
-    const stamCost = Math.max(1, Math.round(6 - G.attackSpeed));
+    const stamCost = 5;
     if (G.stam < stamCost) {
       log(t('lowStaminaMine'), 'warn');
       return;
@@ -922,7 +921,7 @@ function mineCell(tx, ty) {
     const nextHp = Math.max(0, (cell.hp ?? ore.hardness) - G.attackDamage);
     if (nextHp > 0) {
       G.map[ty][tx] = { ...cell, hp: nextHp, maxHp: cell.maxHp ?? ore.hardness };
-      tick(Math.max(1, Math.round(3 - G.attackSpeed)));
+      tick(2);
       render();
       return;
     }
@@ -935,7 +934,7 @@ function mineCell(tx, ty) {
     log(`${t('oreGained', oreName(ore), amount, xpGain)} (+${goldGain}G)`, 'ok');
 
     checkLevelUp();
-    tick(Math.max(1, Math.round(3 - G.attackSpeed)));
+    tick(2);
     render();
   }
 }
@@ -1016,7 +1015,10 @@ function toggleCrafting(forceOpen) {
 }
 
 function craftPickaxe(id) {
-  const cfg = { damage:{cost:100, apply:()=>G.attackDamage=Number((G.attackDamage+0.2).toFixed(1))}, attack_speed:{cost:150, apply:()=>G.attackSpeed=Number((G.attackSpeed+0.2).toFixed(1))}, gold_mult:{cost:180, apply:()=>G.goldMult=Number((G.goldMult+0.2).toFixed(1))} };
+  const cfg = {
+    damage: { cost: 100, apply: () => { G.attackDamage = Number((G.attackDamage + 0.2).toFixed(1)); } },
+    gold_mult: { cost: 180, apply: () => { G.goldMult = Number((G.goldMult + 0.2).toFixed(1)); } },
+  };
   const up = cfg[id];
   if (!up) return;
   if (G.gold < up.cost) { log(t('notEnoughMaterials'), 'warn'); return; }
@@ -1030,7 +1032,6 @@ function allocateStat(stat) {
   if (!G.map || G.gameOver) return;
   if ((G.statPoints || 0) <= 0) return;
   if (stat === 'damage') { G.attackDamage = Number((G.attackDamage + 0.1).toFixed(1)); }
-  else if (stat === 'attack_speed') { G.attackSpeed = Number((G.attackSpeed + 0.1).toFixed(1)); }
   else if (stat === 'gold_mult') { G.goldMult = Number((G.goldMult + 0.1).toFixed(1)); }
   else return;
   G.statPoints -= 1;
@@ -1053,7 +1054,6 @@ function saveGame() {
       xpNext: G.xpNext,
       level: G.level,
         attackDamage: G.attackDamage,
-      attackSpeed: G.attackSpeed,
       goldMult: G.goldMult,
       statPoints: G.statPoints || 0,
       gold: G.gold || 0,
@@ -1096,7 +1096,6 @@ function loadGame() {
       xpNext: saved.xpNext ?? 100,
       level: saved.level ?? 1,
         attackDamage: Number(saved.attackDamage) || 1,
-      attackSpeed: Number(saved.attackSpeed) || 1,
       goldMult: Number(saved.goldMult) || 1,
       statPoints: saved.statPoints ?? 0,
       gold: saved.gold ?? 0,
