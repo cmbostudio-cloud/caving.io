@@ -46,6 +46,10 @@ const UI = {
   xpBar: () => document.getElementById('xp-bar'),
 };
 
+const MAP_EDITOR_CODE = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'a', 'b'];
+const MAP_EDITOR_BRUSHES = ['floor', 'wall', 'grass', 'trail', 'tree', 'flower', 'mineEntrance', 'shop', 'stairs'];
+let mapEditorCodeProgress = 0;
+
 // ---- MAP GENERATION ----
 function blankMap(type) {
   return Array.from({ length: MAP_H }, () =>
@@ -177,6 +181,7 @@ function newFloor() {
   G.selected = null;
   G.map[G.py][G.px].type = 'floor';
   placeReachableStairs();
+  captureEditorSnapshot();
   render();
   log(t('enterFloor', G.depth), 'info');
   if (G.depth > 1) log(t('deeper'), 'sys');
@@ -190,6 +195,7 @@ function enterShop() {
   G.px = SHOP_POINTS.spawn.x;
   G.py = SHOP_POINTS.spawn.y;
   G.selected = null;
+  captureEditorSnapshot();
   render();
   log(t('shopEnter'), 'info');
 }
@@ -247,6 +253,77 @@ function actOnTile(x, y) {
   }
 
   return false;
+}
+
+function defaultEditorState() {
+  return { unlocked: false, enabled: false, brush: 'floor' };
+}
+
+function cloneMapData(map) {
+  return Array.isArray(map) ? map.map(row => row.map(cell => ({ ...cell }))) : null;
+}
+
+function mapEditorState() {
+  if (!G.mapEditor) G.mapEditor = defaultEditorState();
+  return G.mapEditor;
+}
+
+function captureEditorSnapshot() {
+  const editor = mapEditorState();
+  if (!editor.snapshots) editor.snapshots = {};
+  editor.snapshots[G.area] = cloneMapData(G.map);
+}
+
+function toggleMapEditor(forceEnabled) {
+  const editor = mapEditorState();
+  if (!editor.unlocked) return false;
+  editor.enabled = typeof forceEnabled === 'boolean' ? forceEnabled : !editor.enabled;
+  log(editor.enabled ? `[MAP EDITOR ON] brush=${editor.brush}` : '[MAP EDITOR OFF]', 'sys');
+  return editor.enabled;
+}
+
+function setMapEditorBrush(index) {
+  const editor = mapEditorState();
+  if (!editor.unlocked || !editor.enabled) return;
+  if (index < 0 || index >= MAP_EDITOR_BRUSHES.length) return;
+  editor.brush = MAP_EDITOR_BRUSHES[index];
+  log(`[BRUSH] ${editor.brush}`, 'info');
+}
+
+function paintMapCell(x, y) {
+  const editor = mapEditorState();
+  if (!editor.enabled || !G.map) return false;
+  if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H) return false;
+  if (x === G.px && y === G.py) return false;
+  const brush = editor.brush;
+  if (brush === 'stairs') {
+    for (let yy = 0; yy < MAP_H; yy++) {
+      for (let xx = 0; xx < MAP_W; xx++) {
+        if (G.map[yy][xx].type === 'stairs') G.map[yy][xx] = { type: 'floor' };
+      }
+    }
+  }
+  G.map[y][x] = { type: brush };
+  if (G.area === 'plaza') G.plazaMap = G.map;
+  if (G.area === 'forest') G.forestMap = G.map;
+  render();
+  return true;
+}
+
+function resetEditedMap() {
+  const editor = mapEditorState();
+  const snapshot = editor.snapshots?.[G.area];
+  if (!snapshot) {
+    log('[MAP EDITOR] 복원할 스냅샷이 없습니다.', 'warn');
+    return false;
+  }
+  G.map = cloneMapData(snapshot);
+  if (G.area === 'plaza') G.plazaMap = G.map;
+  if (G.area === 'forest') G.forestMap = G.map;
+  G.selected = null;
+  render();
+  log('[MAP EDITOR] 현재 지역 편집을 취소했습니다. (0)', 'sys');
+  return true;
 }
 
 function useSelectedTile() {
@@ -553,6 +630,7 @@ function initGame() {
     gameOver: false,
     plazaMap: null,
     forestMap: null,
+    mapEditor: defaultEditorState(),
   };
   enterPlaza('start');
   saveGame();
@@ -573,6 +651,7 @@ function enterPlaza(entry = 'start') {
     G.py = PLAZA_POINTS.spawn.y;
   }
 
+  captureEditorSnapshot();
   render();
   log(entry === 'start' ? t('plazaStart') : t('plazaReturn'), 'info');
 }
@@ -590,6 +669,7 @@ function enterForest(entry = 'plaza') {
     G.px = FOREST_POINTS.spawn.x;
     G.py = FOREST_POINTS.spawn.y;
   }
+  captureEditorSnapshot();
   render();
   log(entry === 'return' ? t('forestReturn') : t('forestEnter'), 'info');
 }
@@ -614,7 +694,7 @@ function cellGlyph(cell, isPlayer) {
     case 'flower':
       return { ch: '*', fg: '#ffeb3b', weight: 'bold' };
     case 'mineEntrance':
-      return { ch: 'M', fg: '#ff9800', weight: 'bold' };
+      return { ch: 'M1', fg: '#ff9800', weight: 'bold' };
     case 'forestGate':
       return { ch: '>', fg: '#4caf50', weight: 'bold' };
     case 'plazaExit':
@@ -820,7 +900,7 @@ function tryStairs() {
   } else if (cell.type === 'plazaExit') {
     enterPlaza('forest');
   } else if (cell.type === 'shop') {
-    toggleShop(true);
+    log(t('shopUnavailable'), 'sys');
   } else if (cell.type === 'shopExit') {
     enterPlaza('shop');
   } else {
@@ -1045,6 +1125,7 @@ function saveGame() {
       map: G.map,
       plazaMap: G.plazaMap,
       forestMap: G.forestMap,
+      mapEditor: G.mapEditor || defaultEditorState(),
       selected: G.selected,
       turn: G.turn,
     };
@@ -1092,6 +1173,7 @@ function loadGame() {
       gameOver: false,
       plazaMap: saved.plazaMap || null,
       forestMap: saved.forestMap || null,
+      mapEditor: saved.mapEditor || defaultEditorState(),
     };
     render();
     return true;
@@ -1177,14 +1259,43 @@ document.getElementById('map-canvas').addEventListener('pointerdown', e => {
   e.preventDefault();
   const x = parseInt(btn.dataset.x, 10);
   const y = parseInt(btn.dataset.y, 10);
+  if (paintMapCell(x, y)) return;
   G.selected = { x, y };
   if (!actOnTile(x, y)) render();
 });
 
 document.addEventListener('keydown', e => {
   if (G.gameOver) return;
+  const editor = mapEditorState();
+  const expected = MAP_EDITOR_CODE[mapEditorCodeProgress];
+  const normalizedKey = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+  if (normalizedKey === expected) {
+    mapEditorCodeProgress++;
+    if (mapEditorCodeProgress === MAP_EDITOR_CODE.length) {
+      mapEditorCodeProgress = 0;
+      editor.unlocked = true;
+      toggleMapEditor(true);
+      log('[MAP EDITOR] 1~9 브러시 선택 / M 토글 / 0 취소', 'sys');
+      return;
+    }
+  } else {
+    mapEditorCodeProgress = normalizedKey === MAP_EDITOR_CODE[0] ? 1 : 0;
+  }
+
   if (e.key === 'Escape') {
     toggleSettings(false);
+    return;
+  }
+  if (editor.unlocked && (e.key === 'm' || e.key === 'M')) {
+    toggleMapEditor();
+    return;
+  }
+  if (editor.unlocked && editor.enabled && /^[1-9]$/.test(e.key)) {
+    setMapEditorBrush(Number(e.key) - 1);
+    return;
+  }
+  if (editor.unlocked && editor.enabled && e.key === '0') {
+    resetEditedMap();
     return;
   }
   if (e.key === 'e' || e.key === 'E' || e.key === ' ') {
