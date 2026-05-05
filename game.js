@@ -614,7 +614,7 @@ function cellGlyph(cell, isPlayer) {
     case 'flower':
       return { ch: '*', fg: '#ffeb3b', weight: 'bold' };
     case 'mineEntrance':
-      return { ch: 'M', fg: '#ff9800', weight: 'bold' };
+      return { ch: 'M1', fg: '#ff9800', weight: 'bold' };
     case 'forestGate':
       return { ch: '>', fg: '#4caf50', weight: 'bold' };
     case 'plazaExit':
@@ -820,7 +820,7 @@ function tryStairs() {
   } else if (cell.type === 'plazaExit') {
     enterPlaza('forest');
   } else if (cell.type === 'shop') {
-    toggleShop(true);
+    log(t('shopUnavailable'), 'sys');
   } else if (cell.type === 'shopExit') {
     enterPlaza('shop');
   } else {
