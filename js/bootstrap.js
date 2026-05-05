@@ -248,8 +248,6 @@ function applyLanguage() {
   const upgradeLabelKey = {
     damage: 'upgradeDamage',
     gold_mult: 'upgradeGoldMult',
-    stam_max: 'upgradeStamMax',
-    stam_regen: 'upgradeStamRegen',
   };
   document.querySelectorAll('[data-upgrade]').forEach(btn => {
     const key = upgradeLabelKey[btn.dataset.upgrade];

@@ -1000,8 +1000,6 @@ function craftPickaxe(id) {
   const cfg = {
     damage: { cost: 100, apply: () => { G.attackDamage = Number((G.attackDamage + 0.2).toFixed(1)); } },
     gold_mult: { cost: 180, apply: () => { G.goldMult = Number((G.goldMult + 0.2).toFixed(1)); } },
-    stam_max: { cost: 150, apply: () => { G.stamMax += 10; G.stam = Math.min(G.stamMax, G.stam + 10); } },
-    stam_regen: { cost: 220, apply: () => { G.stamRegen = Number((G.stamRegen + 0.2).toFixed(1)); } },
   };
   const up = cfg[id];
   if (!up) return;
@@ -1017,6 +1015,8 @@ function allocateStat(stat) {
   if ((G.statPoints || 0) <= 0) return;
   if (stat === 'damage') { G.attackDamage = Number((G.attackDamage + 0.1).toFixed(1)); }
   else if (stat === 'gold_mult') { G.goldMult = Number((G.goldMult + 0.1).toFixed(1)); }
+  else if (stat === 'stam_max') { G.stamMax += 5; G.stam = Math.min(G.stamMax, G.stam + 5); }
+  else if (stat === 'stam_regen') { G.stamRegen = Number((G.stamRegen + 0.1).toFixed(1)); }
   else return;
   G.statPoints -= 1;
   render();
